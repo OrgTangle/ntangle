@@ -1,0 +1,6 @@
+The ~ntangle_nodbg.nim~ is the same as ~src/ntangle.nim~ (when this file was
+created), except that it does not contain the debug statements that the latter
+has.
+
+There is *no plan* to keep this ~_nodbg~ version always in sync with
+the version in ~src/~.

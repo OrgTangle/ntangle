@@ -1,0 +1,33 @@
+#+title: No ob-nim output when unittest fails
+#+date: <2018-05-25 Fri>
+
+#+property: header-args :eval never-export
+#+property: header-args:nim :exports both :results output replace verbatim
+* Passing test
+#+begin_src nim :tangle test_passing.nim
+when isMainModule:
+  import unittest
+  suite "check number equality":
+
+    test "1 == 1":
+      check:
+        1 == 1
+#+end_src
+
+#+RESULTS:
+:
+: [Suite] check number equality
+:   [OK] 1 == 1
+
+* Failing test
+#+begin_src nim :tangle test_failing.nim
+when isMainModule:
+  import unittest
+  suite "check number equality (failing)":
+
+    test "1 == 0":
+      check:
+        1 == 0
+#+end_src
+
+#+RESULTS:

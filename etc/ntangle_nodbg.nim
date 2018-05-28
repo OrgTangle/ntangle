@@ -1,22 +1,6 @@
-# Time-stamp: <2018-05-27 23:51:48 kmodi>
+# Time-stamp: <2018-05-27 23:52:09 kmodi>
 
 import os, strformat, strutils, tables
-
-type
-  DebugVerbosity = enum dvNone, dvLow, dvHigh
-
-# const DebugVerbosityLevel = dvLow
-const DebugVerbosityLevel = dvNone
-template dbg(msg: string, verbosity = dvLow) =
-  when DebugVerbosityLevel >= dvLow:
-    case DebugVerbosityLevel:
-      of dvHigh:
-        echo "[DBG] " & fmt(msg)
-      of dvLow:
-        if verbosity == dvLow:
-          echo "[DBG] " & fmt(msg)
-      else:                     # This case is never reached
-        discard
 
 type
   UserError = object of Exception
@@ -31,8 +15,6 @@ proc getFileName(): string =
   let
     numParams = paramCount()
     params = commandLineParams()
-  dbg "numParams = {numParams}"
-  dbg "params = {params}"
 
   if numParams == 0:
     raise newException(UserError, "File to be tangled needs to be passed as argument")
@@ -47,11 +29,9 @@ proc lineAction(line: string, lnum: int, dir: string) =
   ## recording of LINE, next line onwards to global table ``fileData``.
   ## On detection of "#+end_src", stop that recording.
   let lineParts = line.strip.split(" ")
-  dbg "  {lineParts.len} parts: {lineParts}", dvHigh
   if bufEnabled:
     if (lineParts[0].toLowerAscii == "#+end_src"):
       bufEnabled = false
-      dbg "line {lnum}: buffering disabled for {outFileName}"
     else:
       try:
         fileData[outFileName].add(line & "\n")
@@ -64,14 +44,12 @@ proc lineAction(line: string, lnum: int, dir: string) =
         outFileName = lineParts[tangleIndex + 1]
         if (not outFileName.startsWith "/"): # if relative path
           outFileName = dir / outFileName
-        dbg "line {lnum}: buffering enabled for {outFileName}"
         bufEnabled = true
 
 proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
     let data = data.strip(leading=false) # remove trailing newlines/ws at end of data
-    dbg "{file}: <<{data}>>"
     echo fmt"Writing {file} ({data.countLines} lines) .."
     writeFile(file, data)
 
@@ -79,11 +57,8 @@ proc doTangle() =
   let
     file = getFileName()
     dir = parentDir(file)
-  dbg "file = {file}"
-  dbg "parent dir = {dir}"
   var lnum = 1
   for line in lines(file):
-    dbg "{lnum}: {line}", dvHigh
     lineAction(line, lnum, dir)
     inc lnum
   writeFiles()

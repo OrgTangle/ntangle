@@ -1,0 +1,42 @@
+#+title: NTangle
+
+Basic tangling of Org documents using Nim.
+
+* History
+The ~ntangle.nim~ file was written as an exercise to roughly translate the
+Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
+* Caution
+I do not recommend using this for tangling Org files. It worked well for the
+lightly tested file in the ~test/~ dir of this repo.
+
+See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]] section for *real Org tangling*.
+* Building
+[[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
+installation. Think of it as the equivalent of ~pip~ in Python.
+
+With Nim/~nimble~ installed, do:
+#+begin_example
+git clone https://github.com/kaushalmodi/ntangle
+cd ntangle
+nimble build # creates the ntangle binary in the git repo root dir
+#+end_example
+* Installing
+If you want to install it (will build the binary and copy it to
+=~/.nimble/bin/=), do:
+#+begin_example
+# cd to the git repo dir
+nimble install
+#+end_example
+
+/You need to have added =~/.nimble/bin/= to your ~PATH~ environment
+variable.
+* Testing
+#+begin_example
+# from the git root dir, after the "nimble build" step
+./ntangle test/test1.org
+#+end_example
+You should see:
+#+begin_example
+Writing test/test_passing.nim (7 lines) ..
+Writing test/test_failing.nim (7 lines) ..
+#+end_example
