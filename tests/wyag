@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+# <<file_header>>
+import libwyag
+libwyag.main()

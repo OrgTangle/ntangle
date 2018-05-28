@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+#<<file_header>>
+LEFT=$(pwd)/wyag
+RIGHT=git
+
+LEFT_CWD=""
+RIGHT_CWD=""
+
+RUN=0
+ERROR=0
+LOGFILE=$(mktemp)
+
+function test_setup() {
+    true;
+}
+
+function test_begin() {
+    let RUN+=1
+
+    echo -n "" > $LOGFILE
+    test_log "begin #$RUN: $1..."
+
+    LEFT_CWD=$(mktemp -d --tmpdir ${RUN}_LEFT.XXXX)
+    RIGHT_CWD=$(mktemp -d --tmpdir ${RUN}_RIGHT.XXXX)
+
+    test_setup
+}
+
+function test_log() {
+    echo -e "\t$@" >> $LOGFILE
+}
+
+function test_run() {
+    # Run $@
+
+    test_log "run $@"
+
+    cd $LEFT_CWD
+    $LEFT $@ > /dev/null 2> /dev/null
+    LEFT_ERR=$?
+
+    cd $RIGHT_CWD
+    $RIGHT $@ > /dev/null 2> /dev/null
+    RIGHT_ERR=$?
+
+    DIFF=$(diff -arq $LEFT_CWD $RIGHT_CWD)
+    DIFF_ERR=$?
+
+    if [[ $LEFT_ERR != $RIGHT_ERR ]]; then
+       let ERROR+=1
+       test_log "Return codes don't match: ($LEFT_ERR != $RIGHT_ERR).";
+    fi
+}
+
+function assert_equivalent() {
+    # Run $@ on LEFT_CWD and RIGHT_CWD and check that error code and
+    # stdout are identical
+
+    test_log assert_equivalent $@
+
+    cd $LEFT_CWD
+    LEFT_LOG=$($@) > /dev/null 2>/dev/null
+    LEFT_ERR=$?
+
+    cd $RIGHT_CWD
+    RIGHT_LOG=$($@) 2>/dev/null
+    RIGHT_ERR=$?
+
+    if [[ $LEFT_ERR != $RIGHT_ERR ]]; then
+        let FAILED+=1
+        test_log "Return codes don't match: ($LEFT_ERR != $RIGHT_ERR)."
+    fi
+    if [[ $LEFT_LOG != $RIGHT_LOG ]]; then
+        let FAILED+=1
+        test_log "Stdouts differ."
+    fi
+}
+
+function test_done() {
+    if [[ $ERROR != 0 ]]; then
+       echo -e "#${RUN}\tFAILED"
+       cat $LOGFILE
+    else
+        echo -e "#${RUN} ok"
+    fi
+
+    rm -rf $LEFT_CWD
+    rm -rf $RIGHT_CWD
+}
+
+
+# Test #1: git init [vs] wyag init
+test_begin "Create a new repo"
+test_run init
+assert_equivalent git status --porcelain=v2 --branch
+test_done
+
+# Test #2: git init test [vs] wyag init test
+test_begin "Create a new repo in a different directory"
+test_run init test
+assert_equivalent git -C test status --porcelain=v2 --branch
+test_done
