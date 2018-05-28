@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-28 00:34:54 kmodi>
+# Time-stamp: <2018-05-28 08:59:38 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -25,6 +25,7 @@ var
   fileData = initTable[string, string]()
   outFileName: string
   bufEnabled: bool
+  extraIndent = 0
 
 proc getFileName(): string =
   ##Get the first command line argument as the file name
@@ -42,6 +43,25 @@ proc getFileName(): string =
 the remaining arguments will be discarded."""
     result = params[0]
 
+proc lineAdjust(line: string): string =
+  ## Remove extra indentation from ``line``, and append it with newline.
+  result =
+    if extraIndent == 0:
+      line & "\n"
+    elif line.len <= 2 :
+      line & "\n"
+    else:
+      var truncSafe = true
+      for i, c in line[0 ..< extraIndent]:
+        dbg "line[{i}] = {c}"
+        if c != ' ': # Don't truncate if the to-be-truncated portion is not all spaces
+          truncSafe = false
+          break
+      if truncSafe:
+        line[extraIndent .. line.high] & "\n"
+      else:
+        line & "\n"
+
 proc lineAction(line: string, lnum: int, dir: string) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
@@ -54,9 +74,14 @@ proc lineAction(line: string, lnum: int, dir: string) =
       dbg "line {lnum}: buffering disabled for {outFileName}"
     else:
       try:
-        fileData[outFileName].add(line & "\n")
+        fileData[outFileName].add(lineAdjust(line))
       except KeyError: # If outFileName key is not yet set in fileData
-        fileData[outFileName] = line & "\n"
+        # This part will be accessing only for the first line of any
+        # tangled file.  It is assumed that no indentation is expected
+        # on that line in the tangled file.
+        extraIndent = line.len - line.strip(trailing=false).len
+        dbg "extraIndent = {extraIndent}"
+        fileData[outFileName] = lineAdjust(line)
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
       let tangleIndex = lineParts.find(":tangle")

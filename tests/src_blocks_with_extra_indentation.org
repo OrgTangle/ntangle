@@ -1,0 +1,17 @@
+Code blocks have extra indentation of 2 spaces.
+
+#+begin_src nim :tangle hi2.nim :padline no
+  echo "hi 1"
+#+end_src
+
+#+begin_src nim :tangle hello2.nim :padline no
+  echo "hello 1"
+#+end_src
+
+#+begin_src nim :tangle hi2.nim :padline no
+  echo "hi 2"
+#+end_src
+
+#+begin_src nim :tangle hello2.nim :padline no
+  echo "hello 2"
+#+end_src
