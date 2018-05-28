@@ -40,3 +40,12 @@ You should see:
 Writing test/test_passing.nim (7 lines) ..
 Writing test/test_failing.nim (7 lines) ..
 #+end_example
+* Limitations
+I wouldn't be surprised if there are many more limitations than the
+few listed below:
+- Assumes ~:padline no~ tangle option i.e. does *not* add a newline
+  after each tangled source block.
+- Does not support ~noweb~. I sorely miss the lack of ~noweb~
+  support.. I use it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
+- A lot of other tangle options.. Visit ~(org) Extracting Source Code~
+  Info manual node.
