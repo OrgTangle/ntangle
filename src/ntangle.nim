@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-27 23:51:48 kmodi>
+# Time-stamp: <2018-05-28 00:34:54 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -70,7 +70,6 @@ proc lineAction(line: string, lnum: int, dir: string) =
 proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
-    let data = data.strip(leading=false) # remove trailing newlines/ws at end of data
     dbg "{file}: <<{data}>>"
     echo fmt"Writing {file} ({data.countLines} lines) .."
     writeFile(file, data)

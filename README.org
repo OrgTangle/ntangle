@@ -37,8 +37,8 @@ variable.
 #+end_example
 You should see:
 #+begin_example
-Writing test/test_passing.nim (7 lines) ..
-Writing test/test_failing.nim (7 lines) ..
+Writing test/test_passing.nim (8 lines) ..
+Writing test/test_failing.nim (8 lines) ..
 #+end_example
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
