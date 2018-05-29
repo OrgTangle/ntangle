@@ -1,0 +1,11 @@
+#+begin_src shell :tangle "file_permissions_755" :tangle-mode (identity #o755)
+echo "permissions of this file will be 755"
+#+end_src
+
+#+begin_src shell :tangle "file_permissions_644" :tangle-mode (identity #o644)
+echo "permissions of this file will be 644"
+#+end_src
+
+#+begin_src shell :tangle "file_permissions_600_override_shebang" :tangle-mode (identity #o600) :shebang "#!/usr/bin/env bash"
+echo "permissions of this file will be 600 even though :shebang is used"
+#+end_src

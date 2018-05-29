@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo "permissions of this file will be 600 even though :shebang is used"

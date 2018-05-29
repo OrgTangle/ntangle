@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 14:34:44 kmodi>
+# Time-stamp: <2018-05-29 15:33:03 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -25,11 +25,13 @@ type
     padline: bool
     shebang: string
     mkdirp: bool
+    permissions: set[FilePermission]
 
 const
   tanglePropertiesDefault = HeaderProperty(padline : true,
                                            shebang : "",
-                                           mkdirp : false)
+                                           mkdirp : false,
+                                           permissions : {})
 
 var
   orgFile: string
@@ -56,6 +58,34 @@ proc getFileName(): string =
       echo """WARNING: Only the first argument is used as the file name,
 the remaining arguments will be discarded."""
     result = params[0]
+
+proc parseFilePermissions(o: string): set[FilePermission] =
+  ## Converts the input permissions octal string to a Nim set for FilePermission type.
+  # https://devdocs.io/nim/os#FilePermission
+  var perm: set[FilePermission]
+  if o[0] != '0':
+    if o[0] in {'4', '5', '6', '7'}:
+      perm = perm + {fpUserRead}
+    if o[0] in {'2', '3', '6', '7'}:
+      perm = perm + {fpUserWrite}
+    if o[0] in {'1', '3', '5', '7'}:
+      perm = perm + {fpUserExec}
+  if o[1] != '0':
+    if o[1] in {'4', '5', '6', '7'}:
+      perm = perm + {fpGroupRead}
+    if o[1] in {'2', '3', '6', '7'}:
+      perm = perm + {fpGroupWrite}
+    if o[1] in {'1', '3', '5', '7'}:
+      perm = perm + {fpGroupExec}
+  if o[2] != '0':
+    if o[2] in {'4', '5', '6', '7'}:
+      perm = perm + {fpOthersRead}
+    if o[2] in {'2', '3', '6', '7'}:
+      perm = perm + {fpOthersWrite}
+    if o[2] in {'1', '3', '5', '7'}:
+      perm = perm + {fpOthersExec}
+  dbg "permissions = {perm}"
+  result = perm
 
 proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
   ##Org header arguments related to tangling. See (org) Extracting Source Code.
@@ -111,6 +141,17 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
             prop.mkdirp = false
           else:
             raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+      of "tangle-mode":
+        let octalPerm = argval.split("#o", maxsplit=1)
+        if octalPerm.len != 2:
+          raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+        if octalPerm[1].len < 3:
+          raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+        let
+          octalPermOwner = octalPerm[1][0]
+          octalPermGroup = octalPerm[1][1]
+          octalPermOther = octalPerm[1][2]
+        prop.permissions = parseFilePermissions(octalPermOwner & octalPermGroup & octalPermOther)
       # of "comments":
       #   case argval:
       #     of "yes":
@@ -121,8 +162,6 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       #     of "noweb":
       #     else:
       #       # error message
-      # of "tangle-mode":
-      #   # use argval
       # of "no-expand":
       #   case argval:
       #     of "yes":
@@ -227,9 +266,11 @@ proc writeFiles() =
     if dirExists(outDir):
       echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
       writeFile(file, data_updated)
-      # If a tangled file has a shebang, auto-add user executable
-      # permissions (as Org does too).
-      if tangleProperties[file].shebang != "":
+      if tangleProperties[file].permissions != {}:
+        file.setFilePermissions(tangleProperties[file].permissions)
+      elif tangleProperties[file].shebang != "":
+        # If a tangled file has a shebang, auto-add user executable
+        # permissions (as Org does too).
         file.inclFilePermissions({fpUserExec})
     else:
       raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")

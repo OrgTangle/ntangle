@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-05-29 14:38:53 kmodi>
+# Time-stamp: <2018-05-29 15:36:44 kmodi>
 
 cd ..
 nimble build -d:release
@@ -14,5 +14,7 @@ nimble build -d:release
 rm -rf ./tests/foo/bar/
 ./ntangle tests/mkdirp_no.org || true
 ./ntangle tests/mkdirp_yes.org
+
+./ntangle tests/tangle_mode.org
 
 # ./ntangle tests/eless.org

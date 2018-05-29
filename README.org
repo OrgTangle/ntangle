@@ -74,8 +74,12 @@ Parsing tests/mkdirp_yes.org ..
   Creating tests/./foo/bar ..
   Writing tests/./foo/bar/mkdirp_test.sh (2 lines) ..
 
-#+end_example
+Parsing tests/tangle_mode.org ..
+  Writing tests/file_permissions_600_override_shebang (3 lines) ..
+  Writing tests/file_permissions_644 (2 lines) ..
+  Writing tests/file_permissions_755 (2 lines) ..
 
+#+end_example
 
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
