@@ -1,4 +1,4 @@
-   #<<file_header>>
+#<<file_header>>
 import argparse
 
 import collections

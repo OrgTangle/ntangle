@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 09:47:57 kmodi>
+# Time-stamp: <2018-05-29 10:30:17 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -30,9 +30,7 @@ var
   outFileName: string
   bufEnabled: bool
   firstLineSrcBlock = false
-  fileExtraIndent = 0
-  blockBeginSrcIndent = 0
-  blockExtraIndent = 0
+  blockIndent = 0
 
 proc getFileName(): string =
   ##Get the first command line argument as the file name
@@ -79,36 +77,22 @@ proc lineAction(line: string, lnum: int, dir: string) =
   if bufEnabled:
     if (lineParts[0].toLowerAscii == "#+end_src"):
       bufEnabled = false
-      blockBeginSrcIndent = 0
-      blockExtraIndent = 0
       dbg "line {lnum}: buffering disabled for {outFileName}"
     else:
-      var indent: int
       dbg "  {lineParts.len} parts: {lineParts}", dvHigh
 
-      # The indentation of the code is the actual indentation of the
-      # code line minus the indentation of the "#+begin_src" # line of
-      # the containing src block.
+      # Assume that the first line of every src block has zero
+      # indentation.
       if firstLineSrcBlock:
-        blockExtraIndent = (line.len - line.strip(trailing=false).len) - blockBeginSrcIndent
+        blockIndent = (line.len - line.strip(trailing=false).len)
 
       try:
-        # If the first line of an src block is indented less than the
-        # fileExtraIndent, use that smaller indentation value for the
-        # indentation truncation.
-        indent = blockBeginSrcIndent + min(blockExtraIndent, fileExtraIndent)
         if firstLineSrcBlock and tangleProperties["padline"]:
           fileData[outFileName].add("\n")
-        fileData[outFileName].add(lineAdjust(line, indent))
+        fileData[outFileName].add(lineAdjust(line, blockIndent))
       except KeyError: # If outFileName key is not yet set in fileData
-        # This part will be accessing only for the first line of any
-        # tangled file.  It is assumed that no indentation is expected
-        # on that line in the tangled file.
-        fileExtraIndent = line.len - line.strip(trailing=false).len
-        indent = blockBeginSrcIndent + fileExtraIndent
-        fileData[outFileName] = lineAdjust(line, indent)
-      dbg """extra indentation: {indent} :: fileExtraIndent={fileExtraIndent},
-blockBeginSrcIndent={blockBeginSrcIndent}, blockExtraIndent={blockExtraIndent}"""
+        fileData[outFileName] = lineAdjust(line, blockIndent)
+      dbg "  extra indentation: {blockIndent}"
       firstLineSrcBlock = false
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
@@ -120,8 +104,6 @@ blockBeginSrcIndent={blockBeginSrcIndent}, blockExtraIndent={blockExtraIndent}""
         if (not outFileName.startsWith "/"): # if relative path
           outFileName = dir / outFileName
         dbg "line {lnum}: buffering enabled for {outFileName}"
-        # Calculate the indentation of the "#+begin_src" line
-        blockBeginSrcIndent = line.len - line.strip(trailing=false).len
         bufEnabled = true
         firstLineSrcBlock = true
         if newlineAfterBlockIndex >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
