@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 10:30:17 kmodi>
+# Time-stamp: <2018-05-29 10:52:54 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -48,6 +48,26 @@ proc getFileName(): string =
 the remaining arguments will be discarded."""
     result = params[0]
 
+proc parseTangleHeaderArguments(parts: seq[string], lnum: int, dir: string) =
+  let
+    args = @["tangle", "padline"]
+  # setting defaults
+  tangleProperties["padline"] = tanglePropertiesDefault["padline"]
+  for arg in args:
+    let idx = parts.find(":" & arg)
+    if idx >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
+      let argval = parts[idx + 1]
+      case arg:
+        of "tangle":
+          outFileName = argval
+          if (not outFileName.startsWith "/"): # if relative path
+            outFileName = dir / outFileName
+          dbg "line {lnum}: buffering enabled for {outFileName}"
+          bufEnabled = true
+          firstLineSrcBlock = true
+        of "padline":
+          tangleProperties["padline"] = (not (argval == "no"))
+
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
   result =
@@ -96,20 +116,7 @@ proc lineAction(line: string, lnum: int, dir: string) =
       firstLineSrcBlock = false
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
-      let
-        tangleIndex = lineParts.find(":tangle")
-        newlineAfterBlockIndex = lineParts.find(":padline")
-      if tangleIndex >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
-        outFileName = lineParts[tangleIndex + 1]
-        if (not outFileName.startsWith "/"): # if relative path
-          outFileName = dir / outFileName
-        dbg "line {lnum}: buffering enabled for {outFileName}"
-        bufEnabled = true
-        firstLineSrcBlock = true
-        if newlineAfterBlockIndex >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
-          tangleProperties["padline"] = (not (lineParts[newlineAfterBlockIndex + 1] == "no"))
-        else:
-          tangleProperties["padline"] = tanglePropertiesDefault["padline"]
+      parseTangleHeaderArguments(lineParts, lnum, dir)
 
 proc writeFiles() =
   ## Write the files from ``fileData``
