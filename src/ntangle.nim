@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 11:18:34 kmodi>
+# Time-stamp: <2018-05-29 11:51:16 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -20,6 +20,7 @@ template dbg(msg: string, verbosity = dvLow) =
 
 type
   UserError = object of Exception
+  OrgError = object of Exception
 
 const
   tanglePropertiesDefault = {"padline": true}.toTable
@@ -50,10 +51,13 @@ the remaining arguments will be discarded."""
     result = params[0]
 
 proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
+  ##Org header arguments related to tangling. See (org) Extracting Source Code.
   let
     args = @["tangle", "padline"]
+
   # setting defaults
   tangleProperties["padline"] = tanglePropertiesDefault["padline"]
+
   for arg in args:
     let idx = parts.find(":" & arg)
     dbg "arg={arg}, idx={idx}"
@@ -82,7 +86,66 @@ proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
             bufEnabled = true
             firstLineSrcBlock = true
         of "padline":
-          tangleProperties["padline"] = (not (argval == "no"))
+          case argval:
+            of "yes":
+              tangleProperties["padline"] = true
+            of "no":
+              tangleProperties["padline"] = false
+            else:
+              raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        # of "mkdirp":
+        #   case argval:
+        #     of "yes":
+        #       tangleProperties["mkdirp"] = true
+        #     of "no":
+        #       tangleProperties["mkdirp"] = false
+        #     else:
+        #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        # of "comments":
+        #   case argval:
+        #     of "yes":
+        #     of "no":
+        #     of "link":
+        #     of "org":
+        #     of "both":
+        #     of "noweb":
+        #     else:
+        #       # error message
+        # of "shebang":
+        #   # use argval
+        # of "tangle-mode":
+        #   # use argval
+        # of "no-expand":
+        #   case argval:
+        #     of "yes":
+        #       tangleProperties["no-expand"] = true
+        #     of "no":
+        #       tangleProperties["no-expand"] = false
+        #     else:
+        #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        # of "noweb":
+        #   case argval:
+        #     of "yes":
+        #     of "no":
+        #     of "tangle":
+        #     of "no-export":
+        #     of "strip-export":
+        #     of "eval":
+        #     else:
+        #       # error message
+        # of "noweb-ref":
+        #   # use argval
+        # of "noweb-sep":
+        #   # use argval
+        else:
+          echo fmt"':{arg}' header argument is not supported at the moment."
+          discard
+        # of "":
+        #   case argval:
+        #     of "yes":
+        #     of "no":
+        #     else:
+        #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
 
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
