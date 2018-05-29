@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 10:52:54 kmodi>
+# Time-stamp: <2018-05-29 10:56:14 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -25,6 +25,7 @@ const
   tanglePropertiesDefault = {"padline": true}.toTable
 
 var
+  orgFile: string
   fileData = initTable[string, string]()
   tangleProperties = tanglePropertiesDefault
   outFileName: string
@@ -127,12 +128,12 @@ proc writeFiles() =
 
 proc doTangle() =
   let
-    file = getFileName()
-    dir = parentDir(file)
-  dbg "file = {file}"
+    orgFile = getFileName()
+    dir = parentDir(orgFile)
+  dbg "Org file = {orgFile}"
   dbg "parent dir = {dir}"
   var lnum = 1
-  for line in lines(file):
+  for line in lines(orgFile):
     dbg "{lnum}: {line}", dvHigh
     lineAction(line, lnum, dir)
     inc lnum
