@@ -36,7 +36,6 @@ cd tests
 ./test.sh
 #+end_src
 
-#+RESULTS:
 #+begin_example
   Verifying dependencies for ntangle@0.1.0
    Building ntangle/ntangle using c backend
