@@ -1,0 +1,3 @@
+#+begin_src shell :shebang "#!/usr/bin/env bash" :tangle "echo.sh"
+echo "Hello"
+#+end_src
