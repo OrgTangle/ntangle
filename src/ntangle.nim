@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 11:51:16 kmodi>
+# Time-stamp: <2018-05-29 11:59:53 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -53,7 +53,7 @@ the remaining arguments will be discarded."""
 proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
   ##Org header arguments related to tangling. See (org) Extracting Source Code.
   let
-    args = @["tangle", "padline"]
+    args = @["tangle", "padline", "mkdirp", "comments", "shebang", "tangle-mode", "no-expand", "noweb", "noweb-ref", "noweb-sep"]
 
   # setting defaults
   tangleProperties["padline"] = tanglePropertiesDefault["padline"]
@@ -138,7 +138,7 @@ proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
         # of "noweb-sep":
         #   # use argval
         else:
-          echo fmt"':{arg}' header argument is not supported at the moment."
+          echo fmt"  [WARN] Line {lnum} - ':{arg}' header argument is not supported at the moment."
           discard
         # of "":
         #   case argval:
@@ -201,18 +201,19 @@ proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
     dbg "{file}: <<{data}>>"
-    echo fmt"Writing {file} ({data.countLines} lines) .."
+    echo fmt"  Writing {file} ({data.countLines} lines) .."
     writeFile(file, data)
 
 proc doTangle() =
   orgFile = getFileName()
-  dbg "Org file = {orgFile}"
+  echo fmt"Parsing {orgFile} .."
   var lnum = 1
   for line in lines(orgFile):
     dbg "{lnum}: {line}", dvHigh
     lineAction(line, lnum)
     inc lnum
   writeFiles()
+  echo ""
 
 proc ntangle() =
   ##NTangle 0.1.0

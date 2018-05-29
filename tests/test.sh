@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-05-29 11:18:56 kmodi>
+# Time-stamp: <2018-05-29 12:05:30 kmodi>
 
 cd ..
-nimble build
+nimble build -d:release
 ./ntangle tests/test1.org
 ./ntangle tests/tangle_no_yes.org
 ./ntangle tests/src_blocks_with_extra_indentation.org

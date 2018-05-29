@@ -31,14 +31,39 @@ nimble install
 /You need to have added =~/.nimble/bin/= to your ~PATH~ environment
 variable.
 * Testing
+#+begin_src shell :results output verbatim
+cd tests
+./test.sh
+#+end_src
+
+#+RESULTS:
 #+begin_example
-# from the git root dir, after the "nimble build" step
-./ntangle test/test1.org
-#+end_example
-You should see:
-#+begin_example
-Writing test/test_passing.nim (8 lines) ..
-Writing test/test_failing.nim (8 lines) ..
+  Verifying dependencies for ntangle@0.1.0
+   Building ntangle/ntangle using c backend
+Parsing tests/test1.org ..
+  Writing tests/test_passing.nim (8 lines) ..
+  Writing tests/test_failing.nim (8 lines) ..
+
+Parsing tests/tangle_no_yes.org ..
+  Writing tests/specified_file.nim (2 lines) ..
+  Writing tests/tangle_no_yes.nim (2 lines) ..
+
+Parsing tests/src_blocks_with_extra_indentation.org ..
+  Writing tests/hello2.nim (3 lines) ..
+  Writing tests/hi2.nim (3 lines) ..
+
+Parsing tests/multiple_src_blocks_tangled_to_same_file.org ..
+  Writing tests/hello.nim (3 lines) ..
+  Writing tests/hi.nim (3 lines) ..
+
+Parsing tests/write-yourself-a-git.org ..
+  [WARN] Line 200 - ':noweb' header argument is not supported at the moment.
+  [WARN] Line 226 - ':noweb' header argument is not supported at the moment.
+  [WARN] Line 339 - ':noweb' header argument is not supported at the moment.
+  Writing tests/libwyag.py (683 lines) ..
+  Writing tests/wyag (5 lines) ..
+  Writing tests/wyag-tests (104 lines) ..
+
 #+end_example
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
