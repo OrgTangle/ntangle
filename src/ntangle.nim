@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-28 08:59:38 kmodi>
+# Time-stamp: <2018-05-29 09:00:04 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -25,7 +25,10 @@ var
   fileData = initTable[string, string]()
   outFileName: string
   bufEnabled: bool
-  extraIndent = 0
+  firstLineSrcBlock = false
+  fileExtraIndent = 0
+  blockBeginSrcIndent = 0
+  blockExtraIndent = 0
 
 proc getFileName(): string =
   ##Get the first command line argument as the file name
@@ -39,26 +42,26 @@ proc getFileName(): string =
     raise newException(UserError, "File to be tangled needs to be passed as argument")
   elif numParams >= 1:
     if numParams > 1:
-      echo fmt"""WARNING: Only the first argument is used as the file name,
+      echo """WARNING: Only the first argument is used as the file name,
 the remaining arguments will be discarded."""
     result = params[0]
 
-proc lineAdjust(line: string): string =
+proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
   result =
-    if extraIndent == 0:
+    if indent == 0:
       line & "\n"
     elif line.len <= 2 :
       line & "\n"
     else:
       var truncSafe = true
-      for i, c in line[0 ..< extraIndent]:
+      for i, c in line[0 ..< indent]:
         dbg "line[{i}] = {c}"
         if c != ' ': # Don't truncate if the to-be-truncated portion is not all spaces
           truncSafe = false
           break
       if truncSafe:
-        line[extraIndent .. line.high] & "\n"
+        line[indent .. line.high] & "\n"
       else:
         line & "\n"
 
@@ -67,21 +70,40 @@ proc lineAction(line: string, lnum: int, dir: string) =
   ## recording of LINE, next line onwards to global table ``fileData``.
   ## On detection of "#+end_src", stop that recording.
   let lineParts = line.strip.split(" ")
-  dbg "  {lineParts.len} parts: {lineParts}", dvHigh
+  if firstLineSrcBlock:
+    dbg "  first line of src block"
   if bufEnabled:
     if (lineParts[0].toLowerAscii == "#+end_src"):
       bufEnabled = false
+      blockBeginSrcIndent = 0
+      blockExtraIndent = 0
       dbg "line {lnum}: buffering disabled for {outFileName}"
     else:
+      var indent: int
+      dbg "  {lineParts.len} parts: {lineParts}", dvHigh
+
+      # The indentation of the code is the actual indentation of the
+      # code line minus the indentation of the "#+begin_src" # line of
+      # the containing src block.
+      if firstLineSrcBlock:
+        blockExtraIndent = (line.len - line.strip(trailing=false).len) - blockBeginSrcIndent
+
       try:
-        fileData[outFileName].add(lineAdjust(line))
+        # If the first line of an src block is indented less than the
+        # fileExtraIndent, use that smaller indentation value for the
+        # indentation truncation.
+        indent = blockBeginSrcIndent + min(blockExtraIndent, fileExtraIndent)
+        fileData[outFileName].add(lineAdjust(line, indent))
       except KeyError: # If outFileName key is not yet set in fileData
         # This part will be accessing only for the first line of any
         # tangled file.  It is assumed that no indentation is expected
         # on that line in the tangled file.
-        extraIndent = line.len - line.strip(trailing=false).len
-        dbg "extraIndent = {extraIndent}"
-        fileData[outFileName] = lineAdjust(line)
+        fileExtraIndent = line.len - line.strip(trailing=false).len
+        indent = blockBeginSrcIndent + fileExtraIndent
+        fileData[outFileName] = lineAdjust(line, indent)
+      dbg """extra indentation: {indent} :: fileExtraIndent={fileExtraIndent},
+blockBeginSrcIndent={blockBeginSrcIndent}, blockExtraIndent={blockExtraIndent}"""
+      firstLineSrcBlock = false
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
       let tangleIndex = lineParts.find(":tangle")
@@ -90,7 +112,10 @@ proc lineAction(line: string, lnum: int, dir: string) =
         if (not outFileName.startsWith "/"): # if relative path
           outFileName = dir / outFileName
         dbg "line {lnum}: buffering enabled for {outFileName}"
+        # Calculate the indentation of the "#+begin_src" line
+        blockBeginSrcIndent = line.len - line.strip(trailing=false).len
         bufEnabled = true
+        firstLineSrcBlock = true
 
 proc writeFiles() =
   ## Write the files from ``fileData``
