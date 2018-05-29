@@ -36,6 +36,8 @@ cd tests
 ./test.sh
 #+end_src
 
+# #+RESULTS:
+
 #+begin_example
   Verifying dependencies for ntangle@0.1.0
    Building ntangle/ntangle using c backend
@@ -67,7 +69,14 @@ Parsing tests/shebang.org ..
   Writing tests/echo.sh (3 lines) ..
 
 Parsing tests/missing_arg_value.org ..
+Parsing tests/mkdirp_no.org ..
+Parsing tests/mkdirp_yes.org ..
+  Creating tests/./foo/bar ..
+  Writing tests/./foo/bar/mkdirp_test.sh (2 lines) ..
+
 #+end_example
+
+
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
 few listed below:

@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 14:11:20 kmodi>
+# Time-stamp: <2018-05-29 14:34:44 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -24,10 +24,12 @@ type
   HeaderProperty = object
     padline: bool
     shebang: string
+    mkdirp: bool
 
 const
   tanglePropertiesDefault = HeaderProperty(padline : true,
-                                           shebang : "")
+                                           shebang : "",
+                                           mkdirp : false)
 
 var
   orgFile: string
@@ -101,14 +103,14 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
             raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
       of "shebang":
         prop.shebang = argval
-      # of "mkdirp":
-      #   case argval:
-      #     of "yes":
-      #       prop.mkdirp = true
-      #     of "no":
-      #       prop.mkdirp = false
-      #     else:
-      #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+      of "mkdirp":
+        case argval:
+          of "yes":
+            prop.mkdirp = true
+          of "no":
+            prop.mkdirp = false
+          else:
+            raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
       # of "comments":
       #   case argval:
       #     of "yes":
@@ -213,12 +215,20 @@ proc lineAction(line: string, lnum: int) =
 proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
-    var data_updated = data
+    var
+      data_updated = data
+      (outDir, _, _) = splitFile(file)
     if tangleProperties[file].shebang != "":
       data_updated = tangleProperties[file].shebang & "\n" & data
     dbg "{file}: <<{data_updated}>>"
-    echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
-    writeFile(file, data_updated)
+    if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
+      echo fmt"  Creating {outDir} .."
+      createDir(outDir)
+    if dirExists(outDir):
+      echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
+      writeFile(file, data_updated)
+    else:
+      raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")
 
 proc doTangle() =
   orgFile = getFileName()

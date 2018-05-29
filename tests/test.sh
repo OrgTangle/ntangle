@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-05-29 13:45:13 kmodi>
+# Time-stamp: <2018-05-29 14:38:53 kmodi>
 
 cd ..
 nimble build -d:release
@@ -10,4 +10,9 @@ nimble build -d:release
 ./ntangle tests/write-yourself-a-git.org
 ./ntangle tests/shebang.org
 ./ntangle tests/missing_arg_value.org || true
+
+rm -rf ./tests/foo/bar/
+./ntangle tests/mkdirp_no.org || true
+./ntangle tests/mkdirp_yes.org
+
 # ./ntangle tests/eless.org
