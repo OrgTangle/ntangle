@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 15:33:03 kmodi>
+# Time-stamp: <2018-05-29 15:52:59 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -59,31 +59,22 @@ proc getFileName(): string =
 the remaining arguments will be discarded."""
     result = params[0]
 
-proc parseFilePermissions(o: string): set[FilePermission] =
+proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
   # https://devdocs.io/nim/os#FilePermission
   var perm: set[FilePermission]
-  if o[0] != '0':
-    if o[0] in {'4', '5', '6', '7'}:
-      perm = perm + {fpUserRead}
-    if o[0] in {'2', '3', '6', '7'}:
-      perm = perm + {fpUserWrite}
-    if o[0] in {'1', '3', '5', '7'}:
-      perm = perm + {fpUserExec}
-  if o[1] != '0':
-    if o[1] in {'4', '5', '6', '7'}:
-      perm = perm + {fpGroupRead}
-    if o[1] in {'2', '3', '6', '7'}:
-      perm = perm + {fpGroupWrite}
-    if o[1] in {'1', '3', '5', '7'}:
-      perm = perm + {fpGroupExec}
-  if o[2] != '0':
-    if o[2] in {'4', '5', '6', '7'}:
-      perm = perm + {fpOthersRead}
-    if o[2] in {'2', '3', '6', '7'}:
-      perm = perm + {fpOthersWrite}
-    if o[2] in {'1', '3', '5', '7'}:
-      perm = perm + {fpOthersExec}
+  let
+    readPerms = @[fpUserRead, fpGroupRead, fpOthersRead]
+    writePerms = @[fpUserWrite, fpGroupWrite, fpOthersWrite]
+    execPerms = @[fpUserExec, fpGroupExec, fpOthersExec]
+  for idx, o in octals:
+    if o != '0':
+      if o in {'4', '5', '6', '7'}:
+        perm = perm + {readPerms[idx]}
+      if o in {'2', '3', '6', '7'}:
+        perm = perm + {writePerms[idx]}
+      if o in {'1', '3', '5', '7'}:
+        perm = perm + {execPerms[idx]}
   dbg "permissions = {perm}"
   result = perm
 
