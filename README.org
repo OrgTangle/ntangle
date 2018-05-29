@@ -43,8 +43,8 @@ Writing test/test_failing.nim (8 lines) ..
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
 few listed below:
-- Assumes ~:padline no~ tangle option i.e. does *not* add a newline
-  after each tangled source block.
+- Does not support Org heading specific header properties.
+- Does not support file specific header properties.
 - Does not support ~noweb~. I sorely miss the lack of ~noweb~
   support.. I use it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
 - A lot of other tangle options.. Visit ~(org) Extracting Source Code~

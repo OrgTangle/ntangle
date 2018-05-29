@@ -89,6 +89,7 @@ function test_done() {
 }
 
 
+
 # Test #1: git init [vs] wyag init
 test_begin "Create a new repo"
 test_run init

@@ -1,11 +1,11 @@
-# Time-stamp: <2018-05-29 09:00:04 kmodi>
+# Time-stamp: <2018-05-29 09:47:57 kmodi>
 
 import os, strformat, strutils, tables
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
 
-# const DebugVerbosityLevel = dvLow
+# const DebugVerbosityLevel = dvHigh
 const DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow) =
   when DebugVerbosityLevel >= dvLow:
@@ -21,8 +21,12 @@ template dbg(msg: string, verbosity = dvLow) =
 type
   UserError = object of Exception
 
+const
+  tanglePropertiesDefault = {"padline": true}.toTable
+
 var
   fileData = initTable[string, string]()
+  tangleProperties = tanglePropertiesDefault
   outFileName: string
   bufEnabled: bool
   firstLineSrcBlock = false
@@ -93,6 +97,8 @@ proc lineAction(line: string, lnum: int, dir: string) =
         # fileExtraIndent, use that smaller indentation value for the
         # indentation truncation.
         indent = blockBeginSrcIndent + min(blockExtraIndent, fileExtraIndent)
+        if firstLineSrcBlock and tangleProperties["padline"]:
+          fileData[outFileName].add("\n")
         fileData[outFileName].add(lineAdjust(line, indent))
       except KeyError: # If outFileName key is not yet set in fileData
         # This part will be accessing only for the first line of any
@@ -106,7 +112,9 @@ blockBeginSrcIndent={blockBeginSrcIndent}, blockExtraIndent={blockExtraIndent}""
       firstLineSrcBlock = false
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
-      let tangleIndex = lineParts.find(":tangle")
+      let
+        tangleIndex = lineParts.find(":tangle")
+        newlineAfterBlockIndex = lineParts.find(":padline")
       if tangleIndex >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
         outFileName = lineParts[tangleIndex + 1]
         if (not outFileName.startsWith "/"): # if relative path
@@ -116,6 +124,10 @@ blockBeginSrcIndent={blockBeginSrcIndent}, blockExtraIndent={blockExtraIndent}""
         blockBeginSrcIndent = line.len - line.strip(trailing=false).len
         bufEnabled = true
         firstLineSrcBlock = true
+        if newlineAfterBlockIndex >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
+          tangleProperties["padline"] = (not (lineParts[newlineAfterBlockIndex + 1] == "no"))
+        else:
+          tangleProperties["padline"] = tanglePropertiesDefault["padline"]
 
 proc writeFiles() =
   ## Write the files from ``fileData``

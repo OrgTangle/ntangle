@@ -1,15 +1,25 @@
    #<<file_header>>
 import argparse
+
 import collections
+
 import configparser
+
 import hashlib
+
 import os
+
 import re
+
 import sys
+
 import zlib
+
 argparser = argparse.ArgumentParser(description="The stupid content tracker")
+
 argsubparsers = argparser.add_subparsers(title="Commands", dest="command")
 argsubparsers.required = True
+
 def main(argv=sys.argv[1:]):
     args = argparser.parse_args(argv)
 
@@ -26,6 +36,7 @@ def main(argv=sys.argv[1:]):
     elif args.command == "rm"          : cmd_rm(args)
     elif args.command == "show-ref"    : cmd_show_ref(args)
     elif args.command == "tag"         : cmd_tag(args)
+
 class repository(object):
     """A git repository"""
 
@@ -53,6 +64,7 @@ class repository(object):
             vers = int(self.conf.get("core", "repositoryformatversion"))
             if vers != 0 and not force:
                 raise Exception("Unsupported repositoryformatversion %s" % vers)
+
 def repo_path(repo, *path):
     """Compute path under repo's gitdir."""
     return os.path.join(repo.gitdir, *path)
@@ -82,6 +94,7 @@ def repo_dir(repo, *path, mkdir=False):
         return path
     else:
         return None
+
 def repo_create(path):
     """Create a new repository at path."""
 
@@ -116,6 +129,7 @@ def repo_create(path):
         config.write(f)
 
     return repo
+
 def repo_default_config():
     ret = configparser.ConfigParser()
 
@@ -125,14 +139,17 @@ def repo_default_config():
     ret.set("core", "bare", "false")
 
     return ret
+
 argsp = argsubparsers.add_parser("init", help="Initialize a new, empty repository.")
 argsp.add_argument("path",
                    metavar="directory",
                    nargs="?",
                    default=".",
                    help="Where to create the repository.")
+
 def cmd_init(args):
     repo_create(args.path)
+
 def repo_find(path=".", required=True):
     path = os.path.realpath(path)
 
@@ -153,6 +170,7 @@ def repo_find(path=".", required=True):
 
     # Recursive case
     return repo_find(parent, required)
+
 class GitObject (object):
 
     repo = None
@@ -172,6 +190,7 @@ whatever it takes to convert it into a meaningful representation.  What exactly 
 
     def deserialize(self, data):
         raise Exception("Unimplemented!")
+
 # @TODO Replace the placeholder classes
 class GitCommit(GitObject): pass
 class GitTag(GitObject): pass
@@ -208,8 +227,10 @@ def object_read(repo, object_id):
 
         # Call constructor and return object
         return c(repo, raw[y+1:])
+
 def object_find(repo, name, fmt=None, follow=True):
     return name
+
 def object_write(obj, actually_write=True):
     # Serialize object data
     data = obj.serialize()
@@ -227,6 +248,7 @@ def object_write(obj, actually_write=True):
             f.write(zlib.compress(result))
 
     return sha
+
 class GitBlob(GitObject):
     fmt=b"blob"
 
@@ -235,6 +257,7 @@ class GitBlob(GitObject):
 
     def deserialize(self, data):
         self.blobData = data
+
 argsp = argsubparsers.add_parser("cat-file",
                                  help="Provide content of repository objects")
 
@@ -246,6 +269,7 @@ argsp.add_argument("type",
 argsp.add_argument("object",
                    metavar="object",
                    help="The object to display")
+
 def cmd_cat_file(args):
     repo = repo_find()
     cat_file(repo, args.type, args.object)
@@ -259,6 +283,7 @@ def cat_file(repo, fmt, obj):
 
     # I use Utf-8 because it's ASCII-compatible.
     sys.stdout.buffer.write(obj.serialize())
+
 argsp = argsubparsers.add_parser(
     "hash-object",
     help="Compute object ID and optionally creates a blob from a file")
@@ -285,12 +310,14 @@ mutex0.add_argument("--stdin",
 mutex0.add_argument("path",
                     nargs="?",
                     help="Read object from <file>")
+
 def cmd_hash_object(args):
     repo = repository(".")
 
     with sys.stdin.buffer if args.stdin else open(args.path, "rb") as i:
         sha = object_hash(repo, args.type, i, args.write)
         print(sha)
+
 def object_hash(repo, fmt, f, write_to_repo):
     data = f.read()
 
@@ -304,6 +331,7 @@ def object_hash(repo, fmt, f, write_to_repo):
         raise Exception("Unknown type %s!" % fmt)
 
     return object_write(obj, write_to_repo)
+
 def kvlm_parse(raw, start=0, dct=None):
     if not dct:
         dct = collections.OrderedDict()
@@ -352,6 +380,7 @@ def kvlm_parse(raw, start=0, dct=None):
         dct[key]=value
 
     return kvlm_parse(raw, start=end+1, dct=dct)
+
 def kvlm_serialize(kvlm):
     ret = b''
 
@@ -371,6 +400,7 @@ def kvlm_serialize(kvlm):
     ret += b'\n' + kvlm[b'']
 
     return ret
+
 class GitCommit(GitObject):
     fmt=b'commit'
 
@@ -379,11 +409,13 @@ class GitCommit(GitObject):
 
     def serialize(self):
         return kvlm_serialize(self.kvlm)
+
 argsp = argsubparsers.add_parser("log", help="Display history of a given commit.")
 argsp.add_argument("commit",
                    default="HEAD",
                    nargs="?",
                    help="Commit to start at.")
+
 def cmd_log(args):
     repo = repo_find()
 
@@ -413,11 +445,13 @@ def log_graphviz(repo, sha, seen):
         p = p.decode("ascii")
         print ("c_{0} -> c_{1};".format(sha, p))
         log_graphviz(repo, p, seen)
+
 class GitTreeLeaf(object):
     def __init__(self, mode, path, sha):
         self.mode = mode
         self.path = path
         self.sha = sha
+
 def tree_parse_one(raw, start=0):
     # Read the mode
     mode = raw[start:start+6].decode("ascii")
@@ -436,6 +470,7 @@ def tree_parse_one(raw, start=0):
             raw[end+1:end+21], "big"))[2:] # hex() adds 0x in front,
                                            # we don't want that.
     return end+21, GitTreeLeaf(mode, path, sha)
+
 def tree_parse(raw):
     pos = 0
     max = len(raw)
@@ -445,6 +480,7 @@ def tree_parse(raw):
         ret.append(data)
 
     return ret
+
 class GitTree(GitObject):
     fmt=b'tree'
 
@@ -454,6 +490,7 @@ class GitTree(GitObject):
     def serialize(self):
         #@FIXME Add serializer!
         pass
+
 argsp = argsubparsers.add_parser("ls-tree", help="Pretty-print a tree object.")
 argsp.add_argument("object",
                    help="The object to show.")
@@ -472,6 +509,7 @@ def cmd_ls_tree(args):
             object_read(repo, item.sha).fmt.decode("ascii"),
             item.sha,
             item.path.decode("ascii")))
+
 argsp = argsubparsers.add_parser("checkout", help="Checkout a commit inside of a directory.")
 
 argsp.add_argument("commit",
@@ -479,6 +517,7 @@ argsp.add_argument("commit",
 
 argsp.add_argument("path",
                    help="The EMPTY directory to checkout on.")
+
 def cmd_checkout(args):
     repo = repo_find()
 
@@ -498,6 +537,7 @@ def cmd_checkout(args):
         os.makedirs(args.path)
 
     tree_checkout(repo, obj, os.path.realpath(args.path).encode())
+
 def tree_checkout(repo, tree, path):
     for item in tree.items:
         obj = object_read(repo, item.sha)
@@ -512,6 +552,7 @@ def tree_checkout(repo, tree, path):
         elif obj.fmt == b'blob':
             with open(dest, 'wb') as f:
                 f.write(obj.blobData)
+
 def ref_resolve(repo, ref):
     with open(repo_file(repo, ref), 'r') as fp:
         data = fp.read()[:-1]
@@ -520,6 +561,7 @@ def ref_resolve(repo, ref):
         return ref_resolve(repo, data[5:])
     else:
         return data
+
 def ref_list(repo, path=None):
     if not path:
         path = repo_dir(repo, "refs")
@@ -534,6 +576,7 @@ def ref_list(repo, path=None):
             ret[f] = ref_resolve(repo, can)
 
     return ret
+
 argsp = argsubparsers.add_parser("show-ref", help="List references.")
 
 def cmd_show_ref(args):
@@ -550,6 +593,7 @@ def show_ref(repo, refs, with_hash=True, prefix=""):
                 k))
         else:
             show_ref(repo, v, with_hash=with_hash, prefix="{0}{1}{2}".format(prefix, "/" if prefix else "", k))
+
 argsp = argsubparsers.add_parser(
     "tag",
     help="List and create tags")
@@ -567,6 +611,7 @@ argsp.add_argument("object",
                     default="HEAD",
                     nargs="?",
                     help="The object the new tag will point to")
+
 def cmd_tag(args):
     repo = repo_find()
 
@@ -577,6 +622,7 @@ def cmd_tag(args):
     else:
         refs = ref_list(repo)
         show_ref(repo, refs["tags"], with_hash=False)
+
 def object_resolve(repo, name):
     """Resolve name to an object hash in repo.
 
@@ -603,6 +649,7 @@ This function is aware of:
 
 def object_find(repo, name, fmt=None, follow=None):
     ## Part 1: identify object
+
 class GitIndexEntry(object):
     ctime = None
     """The last time a file's metadata changed.  This is a tuple (seconds, nanoseconds)"""
