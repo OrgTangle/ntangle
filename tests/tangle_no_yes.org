@@ -1,0 +1,11 @@
+#+begin_src nim :tangle no
+echo "this block won't get tangled"
+#+end_src
+
+#+begin_src nim :tangle yes
+echo "this will be tangled to tangle_no_yes.nim"
+#+end_src
+
+#+begin_src nim :tangle specified_file.nim
+echo "this will be tangled to specified_file.nim"
+#+end_src

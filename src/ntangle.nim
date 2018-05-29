@@ -1,11 +1,11 @@
-# Time-stamp: <2018-05-29 10:56:14 kmodi>
+# Time-stamp: <2018-05-29 11:18:34 kmodi>
 
 import os, strformat, strutils, tables
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
 
-# const DebugVerbosityLevel = dvHigh
+# const DebugVerbosityLevel = dvLow
 const DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow) =
   when DebugVerbosityLevel >= dvLow:
@@ -49,23 +49,38 @@ proc getFileName(): string =
 the remaining arguments will be discarded."""
     result = params[0]
 
-proc parseTangleHeaderArguments(parts: seq[string], lnum: int, dir: string) =
+proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
   let
     args = @["tangle", "padline"]
   # setting defaults
   tangleProperties["padline"] = tanglePropertiesDefault["padline"]
   for arg in args:
     let idx = parts.find(":" & arg)
+    dbg "arg={arg}, idx={idx}"
     if idx >= 2: # Because index 0 would be "#+begin_src", and 1 would be "LANG"
       let argval = parts[idx + 1]
+      dbg "  argval={argval}"
       case arg:
         of "tangle":
-          outFileName = argval
-          if (not outFileName.startsWith "/"): # if relative path
-            outFileName = dir / outFileName
-          dbg "line {lnum}: buffering enabled for {outFileName}"
-          bufEnabled = true
-          firstLineSrcBlock = true
+          let
+            (dir, basename, _) = splitFile(orgFile)
+            lang = parts[1] #Safe to assume that parts[1] will contain the src block LANG, like "nim"
+          dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
+          var outfile: string = nil
+          case argval:
+            of "yes":
+              outfile = dir / basename & "." & lang
+            of "no":
+              bufEnabled = false
+            else:               #filename
+              outfile = argval
+              if (not outfile.startsWith "/"): # if relative path
+                outfile = dir / outfile
+          if (not outfile.isNil):
+            outFileName = outfile
+            dbg "line {lnum}: buffering enabled for {outFileName}"
+            bufEnabled = true
+            firstLineSrcBlock = true
         of "padline":
           tangleProperties["padline"] = (not (argval == "no"))
 
@@ -88,7 +103,7 @@ proc lineAdjust(line: string, indent: int): string =
       else:
         line & "\n"
 
-proc lineAction(line: string, lnum: int, dir: string) =
+proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
   ## On detection of "#+end_src", stop that recording.
@@ -117,7 +132,7 @@ proc lineAction(line: string, lnum: int, dir: string) =
       firstLineSrcBlock = false
   else:
     if (lineParts[0].toLowerAscii == "#+begin_src"):
-      parseTangleHeaderArguments(lineParts, lnum, dir)
+      parseTangleHeaderArguments(lineParts, lnum)
 
 proc writeFiles() =
   ## Write the files from ``fileData``
@@ -127,15 +142,12 @@ proc writeFiles() =
     writeFile(file, data)
 
 proc doTangle() =
-  let
-    orgFile = getFileName()
-    dir = parentDir(orgFile)
+  orgFile = getFileName()
   dbg "Org file = {orgFile}"
-  dbg "parent dir = {dir}"
   var lnum = 1
   for line in lines(orgFile):
     dbg "{lnum}: {line}", dvHigh
-    lineAction(line, lnum, dir)
+    lineAction(line, lnum)
     inc lnum
   writeFiles()
 
