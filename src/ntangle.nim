@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 13:43:08 kmodi>
+# Time-stamp: <2018-05-29 14:11:20 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -57,10 +57,11 @@ the remaining arguments will be discarded."""
 
 proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
   ##Org header arguments related to tangling. See (org) Extracting Source Code.
+  var prop: HeaderProperty
   try:
-    tangleProperties[currentLang].padline = tanglePropertiesDefault.padline
-  except KeyError: #If tangleProperties does not already exist for the current language
-    tangleProperties[currentLang] = tanglePropertiesDefault
+    prop = tangleProperties[outFilename]
+  except KeyError: #If tangleProperties does not already exist for the current output file
+    prop = tanglePropertiesDefault
 
   for hdrArg in hdrArgs:
     let
@@ -93,19 +94,19 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       of "padline":
         case argval:
           of "yes":
-            tangleProperties[currentLang].padline = true
+            prop.padline = true
           of "no":
-            tangleProperties[currentLang].padline = false
+            prop.padline = false
           else:
             raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
       of "shebang":
-        tangleProperties[currentLang].shebang = argval
+        prop.shebang = argval
       # of "mkdirp":
       #   case argval:
       #     of "yes":
-      #       tangleProperties[currentLang].mkdirp = true
+      #       prop.mkdirp = true
       #     of "no":
-      #       tangleProperties[currentLang].mkdirp = false
+      #       prop.mkdirp = false
       #     else:
       #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
       # of "comments":
@@ -123,9 +124,9 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       # of "no-expand":
       #   case argval:
       #     of "yes":
-      #       tangleProperties[currentLang].no-expand = true
+      #       prop.no-expand = true
       #     of "no":
-      #       tangleProperties[currentLang].no-expand = false
+      #       prop.no-expand = false
       #     else:
       #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
       # of "noweb":
@@ -153,6 +154,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       #     of "no":
       #     else:
       #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+    tangleProperties[outFilename] = prop #save the updated prop to the global table
 
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
@@ -193,15 +195,11 @@ proc lineAction(line: string, lnum: int) =
         blockIndent = (line.len - line.strip(trailing=false).len)
 
       try:
-        if firstLineSrcBlock and tangleProperties[currentLang].padline:
+        if firstLineSrcBlock and tangleProperties[outFilename].padline:
           fileData[outFileName].add("\n")
         fileData[outFileName].add(lineAdjust(line, blockIndent))
       except KeyError: # If outFileName key is not yet set in fileData
-        if tangleProperties[currentLang].shebang == "":
-          fileData[outFileName] = lineAdjust(line, blockIndent)
-        else:
-          fileData[outFileName] = tangleProperties[currentLang].shebang & "\n"
-          fileData[outFileName].add(lineAdjust(line, blockIndent))
+        fileData[outFileName] = lineAdjust(line, blockIndent)
       dbg "  extra indentation: {blockIndent}"
       firstLineSrcBlock = false
   else:
@@ -215,9 +213,12 @@ proc lineAction(line: string, lnum: int) =
 proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
-    dbg "{file}: <<{data}>>"
-    echo fmt"  Writing {file} ({data.countLines} lines) .."
-    writeFile(file, data)
+    var data_updated = data
+    if tangleProperties[file].shebang != "":
+      data_updated = tangleProperties[file].shebang & "\n" & data
+    dbg "{file}: <<{data_updated}>>"
+    echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
+    writeFile(file, data_updated)
 
 proc doTangle() =
   orgFile = getFileName()
