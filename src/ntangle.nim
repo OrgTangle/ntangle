@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 11:59:53 kmodi>
+# Time-stamp: <2018-05-29 12:52:32 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -21,15 +21,18 @@ template dbg(msg: string, verbosity = dvLow) =
 type
   UserError = object of Exception
   OrgError = object of Exception
+  HeaderProperty = object
+    padline: bool
 
 const
-  tanglePropertiesDefault = {"padline": true}.toTable
+  tanglePropertiesDefault = HeaderProperty(padline : true)
 
 var
   orgFile: string
-  fileData = initTable[string, string]()
-  tangleProperties = tanglePropertiesDefault
+  fileData = initTable[string, string]() # file, data
   outFileName: string
+  currentLang: string
+  tangleProperties = initTable[string, HeaderProperty]() # lang, properties
   bufEnabled: bool
   firstLineSrcBlock = false
   blockIndent = 0
@@ -50,13 +53,15 @@ proc getFileName(): string =
 the remaining arguments will be discarded."""
     result = params[0]
 
-proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
+proc parseTangleHeaderProperties(parts: seq[string], lnum: int) =
   ##Org header arguments related to tangling. See (org) Extracting Source Code.
   let
     args = @["tangle", "padline", "mkdirp", "comments", "shebang", "tangle-mode", "no-expand", "noweb", "noweb-ref", "noweb-sep"]
 
-  # setting defaults
-  tangleProperties["padline"] = tanglePropertiesDefault["padline"]
+  try:
+    tangleProperties[currentLang].padline = tanglePropertiesDefault.padline
+  except KeyError: #If tangleProperties does not already exist for the current language
+    tangleProperties[currentLang] = tanglePropertiesDefault
 
   for arg in args:
     let idx = parts.find(":" & arg)
@@ -66,14 +71,12 @@ proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
       dbg "  argval={argval}"
       case arg:
         of "tangle":
-          let
-            (dir, basename, _) = splitFile(orgFile)
-            lang = parts[1] #Safe to assume that parts[1] will contain the src block LANG, like "nim"
+          let (dir, basename, _) = splitFile(orgFile)
           dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
           var outfile: string = nil
           case argval:
             of "yes":
-              outfile = dir / basename & "." & lang
+              outfile = dir / basename & "." & currentLang #For now, set the extension = currentLang, works for nim, org, but not everything
             of "no":
               bufEnabled = false
             else:               #filename
@@ -88,17 +91,17 @@ proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
         of "padline":
           case argval:
             of "yes":
-              tangleProperties["padline"] = true
+              tangleProperties[currentLang].padline = true
             of "no":
-              tangleProperties["padline"] = false
+              tangleProperties[currentLang].padline = false
             else:
               raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
         # of "mkdirp":
         #   case argval:
         #     of "yes":
-        #       tangleProperties["mkdirp"] = true
+        #       tangleProperties[currentLang].mkdirp = true
         #     of "no":
-        #       tangleProperties["mkdirp"] = false
+        #       tangleProperties[currentLang].mkdirp = false
         #     else:
         #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
         # of "comments":
@@ -118,9 +121,9 @@ proc parseTangleHeaderArguments(parts: seq[string], lnum: int) =
         # of "no-expand":
         #   case argval:
         #     of "yes":
-        #       tangleProperties["no-expand"] = true
+        #       tangleProperties[currentLang].no-expand = true
         #     of "no":
-        #       tangleProperties["no-expand"] = false
+        #       tangleProperties[currentLang].no-expand = false
         #     else:
         #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
         # of "noweb":
@@ -186,7 +189,7 @@ proc lineAction(line: string, lnum: int) =
         blockIndent = (line.len - line.strip(trailing=false).len)
 
       try:
-        if firstLineSrcBlock and tangleProperties["padline"]:
+        if firstLineSrcBlock and tangleProperties[currentLang].padline:
           fileData[outFileName].add("\n")
         fileData[outFileName].add(lineAdjust(line, blockIndent))
       except KeyError: # If outFileName key is not yet set in fileData
@@ -194,8 +197,9 @@ proc lineAction(line: string, lnum: int) =
       dbg "  extra indentation: {blockIndent}"
       firstLineSrcBlock = false
   else:
-    if (lineParts[0].toLowerAscii == "#+begin_src"):
-      parseTangleHeaderArguments(lineParts, lnum)
+    if (lineParts[0].toLowerAscii == "#+begin_src") and (lineParts.len >= 2): #Line needs to begin with "#+begin_src LANG"
+      currentLang = lineParts[1]
+      parseTangleHeaderProperties(lineParts, lnum)
 
 proc writeFiles() =
   ## Write the files from ``fileData``
