@@ -227,6 +227,10 @@ proc writeFiles() =
     if dirExists(outDir):
       echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
       writeFile(file, data_updated)
+      # If a tangled file has a shebang, auto-add user executable
+      # permissions (as Org does too).
+      if tangleProperties[file].shebang != "":
+        file.inclFilePermissions({fpUserExec})
     else:
       raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")
 
