@@ -1,0 +1,3 @@
+#+begin_src shell :tangle
+echo "This should error out as the :tangle header arg is missing a value."
+#+end_src

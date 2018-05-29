@@ -64,6 +64,10 @@ Parsing tests/write-yourself-a-git.org ..
   Writing tests/wyag (5 lines) ..
   Writing tests/wyag-tests (104 lines) ..
 
+Parsing tests/shebang.org ..
+  Writing tests/echo.sh (3 lines) ..
+
+Parsing tests/missing_arg_value.org ..
 #+end_example
 * Limitations
 I wouldn't be surprised if there are many more limitations than the

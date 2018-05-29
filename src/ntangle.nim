@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 13:29:53 kmodi>
+# Time-stamp: <2018-05-29 13:43:08 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -57,9 +57,6 @@ the remaining arguments will be discarded."""
 
 proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
   ##Org header arguments related to tangling. See (org) Extracting Source Code.
-  let
-    args = @["tangle", "padline", "mkdirp", "comments", "shebang", "tangle-mode", "no-expand", "noweb", "noweb-ref", "noweb-sep"]
-
   try:
     tangleProperties[currentLang].padline = tanglePropertiesDefault.padline
   except KeyError: #If tangleProperties does not already exist for the current language
@@ -68,6 +65,9 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
   for hdrArg in hdrArgs:
     let
       hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
+    if hdrArgParts.len != 2:
+      raise newException(OrgError, fmt("Line {lnum} - The header arg ':{hdrArgParts[0]}' is missing its value."))
+    let
       arg = hdrArgParts[0]
       argval = hdrArgParts[1].strip(chars={'"'}) #treat :tangle foo.ext and :tangle "foo.ext" the same
     dbg "arg={arg}, argval={argval}"
@@ -142,6 +142,8 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       #   # use argval
       # of "noweb-sep":
       #   # use argval
+      of "exports", "results":  #Ignore args not relevant to tangling
+        discard
       else:
         echo fmt"  [WARN] Line {lnum} - ':{arg}' header argument is not supported at the moment."
         discard
@@ -226,7 +228,6 @@ proc doTangle() =
     lineAction(line, lnum)
     inc lnum
   writeFiles()
-  echo ""
 
 proc ntangle() =
   ##NTangle 0.1.0
@@ -234,8 +235,10 @@ proc ntangle() =
   try:
     doTangle()
   except:
-    stderr.writeLine "Error: " & getCurrentExceptionMsg()
+    stderr.writeLine "  [ERROR] " & getCurrentExceptionMsg() & "\n"
     quit 1
+  finally:
+    echo ""
 
 when isMainModule:
   ntangle()
