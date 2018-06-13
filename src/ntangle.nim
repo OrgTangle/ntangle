@@ -1,4 +1,4 @@
-# Time-stamp: <2018-05-29 15:52:59 kmodi>
+# Time-stamp: <2018-06-13 12:30:26 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -9,14 +9,14 @@ type
 const DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow) =
   when DebugVerbosityLevel >= dvLow:
-    case DebugVerbosityLevel:
-      of dvHigh:
+    case DebugVerbosityLevel
+    of dvHigh:
+      echo "[DBG] " & fmt(msg)
+    of dvLow:
+      if verbosity == dvLow:
         echo "[DBG] " & fmt(msg)
-      of dvLow:
-        if verbosity == dvLow:
-          echo "[DBG] " & fmt(msg)
-      else:                     # This case is never reached
-        discard
+    else:                     # This case is never reached
+      discard
 
 type
   UserError = object of Exception
@@ -95,97 +95,97 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
       arg = hdrArgParts[0]
       argval = hdrArgParts[1].strip(chars={'"'}) #treat :tangle foo.ext and :tangle "foo.ext" the same
     dbg "arg={arg}, argval={argval}"
-    case arg:
-      of "tangle":
-        let (dir, basename, _) = splitFile(orgFile)
-        dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
-        var outfile: string = nil
-        case argval:
-          of "yes":
-            outfile = dir / basename & "." & currentLang #For now, set the extension = currentLang, works for nim, org, but not everything
-          of "no":
-            bufEnabled = false
-          else:               #filename
-            outfile = argval
-            if (not outfile.startsWith "/"): # if relative path
-              outfile = dir / outfile
-        if (not outfile.isNil):
-          outFileName = outfile
-          dbg "line {lnum}: buffering enabled for {outFileName}"
-          bufEnabled = true
-          firstLineSrcBlock = true
-      of "padline":
-        case argval:
-          of "yes":
-            prop.padline = true
-          of "no":
-            prop.padline = false
-          else:
-            raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
-      of "shebang":
-        prop.shebang = argval
-      of "mkdirp":
-        case argval:
-          of "yes":
-            prop.mkdirp = true
-          of "no":
-            prop.mkdirp = false
-          else:
-            raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
-      of "tangle-mode":
-        let octalPerm = argval.split("#o", maxsplit=1)
-        if octalPerm.len != 2:
-          raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
-        if octalPerm[1].len < 3:
-          raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
-        let
-          octalPermOwner = octalPerm[1][0]
-          octalPermGroup = octalPerm[1][1]
-          octalPermOther = octalPerm[1][2]
-        prop.permissions = parseFilePermissions(octalPermOwner & octalPermGroup & octalPermOther)
-      # of "comments":
-      #   case argval:
-      #     of "yes":
-      #     of "no":
-      #     of "link":
-      #     of "org":
-      #     of "both":
-      #     of "noweb":
-      #     else:
-      #       # error message
-      # of "no-expand":
-      #   case argval:
-      #     of "yes":
-      #       prop.no-expand = true
-      #     of "no":
-      #       prop.no-expand = false
-      #     else:
-      #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
-      # of "noweb":
-      #   case argval:
-      #     of "yes":
-      #     of "no":
-      #     of "tangle":
-      #     of "no-export":
-      #     of "strip-export":
-      #     of "eval":
-      #     else:
-      #       # error message
-      # of "noweb-ref":
-      #   # use argval
-      # of "noweb-sep":
-      #   # use argval
-      of "exports", "results":  #Ignore args not relevant to tangling
-        discard
+    case arg
+    of "tangle":
+      let (dir, basename, _) = splitFile(orgFile)
+      dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
+      var outfile: string = nil
+      case argval
+      of "yes":
+        outfile = dir / basename & "." & currentLang #For now, set the extension = currentLang, works for nim, org, but not everything
+      of "no":
+        bufEnabled = false
+      else:               #filename
+        outfile = argval
+        if (not outfile.startsWith "/"): # if relative path
+          outfile = dir / outfile
+      if (not outfile.isNil):
+        outFileName = outfile
+        dbg "line {lnum}: buffering enabled for {outFileName}"
+        bufEnabled = true
+        firstLineSrcBlock = true
+    of "padline":
+      case argval
+      of "yes":
+        prop.padline = true
+      of "no":
+        prop.padline = false
       else:
-        echo fmt"  [WARN] Line {lnum} - ':{arg}' header argument is not supported at the moment."
-        discard
-      # of "":
-      #   case argval:
-      #     of "yes":
-      #     of "no":
-      #     else:
-      #       raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+    of "shebang":
+      prop.shebang = argval
+    of "mkdirp":
+      case argval
+      of "yes":
+        prop.mkdirp = true
+      of "no":
+        prop.mkdirp = false
+      else:
+        raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+    of "tangle-mode":
+      let octalPerm = argval.split("#o", maxsplit=1)
+      if octalPerm.len != 2:
+        raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+      if octalPerm[1].len < 3:
+        raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+      let
+        octalPermOwner = octalPerm[1][0]
+        octalPermGroup = octalPerm[1][1]
+        octalPermOther = octalPerm[1][2]
+      prop.permissions = parseFilePermissions(octalPermOwner & octalPermGroup & octalPermOther)
+    # of "comments":
+    #   case argval
+    #   of "yes":
+    #   of "no":
+    #   of "link":
+    #   of "org":
+    #   of "both":
+    #   of "noweb":
+    #   else:
+    #     # error message
+    # of "no-expand":
+    #   case argval
+    #   of "yes":
+    #     prop.no-expand = true
+    #   of "no":
+    #     prop.no-expand = false
+    #   else:
+    #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+    # of "noweb":
+    #   case argval
+    #   of "yes":
+    #   of "no":
+    #   of "tangle":
+    #   of "no-export":
+    #   of "strip-export":
+    #   of "eval":
+    #   else:
+    #     # error message
+    # of "noweb-ref":
+    #   # use argval
+    # of "noweb-sep":
+    #   # use argval
+    of "exports", "results":  #Ignore args not relevant to tangling
+      discard
+    else:
+      echo fmt"  [WARN] Line {lnum} - ':{arg}' header argument is not supported at the moment."
+      discard
+    # of "":
+    #   case argval
+    #   of "yes":
+    #   of "no":
+    #   else:
+    #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
     tangleProperties[outFilename] = prop #save the updated prop to the global table
 
 proc lineAdjust(line: string, indent: int): string =

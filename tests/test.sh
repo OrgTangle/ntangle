@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-05-29 15:36:44 kmodi>
+# Time-stamp: <2018-05-29 16:38:08 kmodi>
+
+set -euo pipefail # http://redsymbol.net/articles/unofficial-bash-strict-mode
+IFS=$'\n\t'
 
 cd ..
 nimble build -d:release
