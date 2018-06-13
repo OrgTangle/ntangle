@@ -1,4 +1,4 @@
-# Time-stamp: <2018-06-13 12:30:26 kmodi>
+# Time-stamp: <2018-06-13 13:32:59 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -246,17 +246,17 @@ proc writeFiles() =
   ## Write the files from ``fileData``
   for file, data in fileData:
     var
-      data_updated = data
+      dataUpdated = data
       (outDir, _, _) = splitFile(file)
     if tangleProperties[file].shebang != "":
-      data_updated = tangleProperties[file].shebang & "\n" & data
-    dbg "{file}: <<{data_updated}>>"
+      dataUpdated = tangleProperties[file].shebang & "\n" & data
+    dbg "{file}: <<{dataUpdated}>>"
     if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
       echo fmt"  Creating {outDir} .."
       createDir(outDir)
     if dirExists(outDir):
-      echo fmt"  Writing {file} ({data_updated.countLines} lines) .."
-      writeFile(file, data_updated)
+      echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
+      writeFile(file, dataUpdated)
       if tangleProperties[file].permissions != {}:
         file.setFilePermissions(tangleProperties[file].permissions)
       elif tangleProperties[file].shebang != "":
