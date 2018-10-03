@@ -39,10 +39,10 @@ install:
         ./koch boot -d:release;
         rm -rf csources;
       )"
-  # - "{ [ -f ${NIMDIR}/bin/nimble ]; } ||
-  #     ( cd ${NIMDIR};
-  #       ./koch tools;
-  #     )"
+  - "{ [ -f ${NIMDIR}/bin/nimble ]; } ||
+      ( cd ${NIMDIR};
+        ./koch tools;
+      )"
   - export PATH="${NIMDIR}/bin:${PATH}"
   - nim -v
 
@@ -60,6 +60,7 @@ script:
   # Ensure that you are in repo/build root now.
   - cd "${TRAVIS_BUILD_DIR}"
   # Compile the static binary using musl.
+  - nimble install --depsOnly
   - nim musl "${NIMFILE}"
   # See that the binary is not dynamic.
   - ldd "${BINFILE}" || true
