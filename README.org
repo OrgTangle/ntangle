@@ -9,12 +9,13 @@ See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- 
 tangling*.
 
 * Download binary
-- 64-bit GNU/Linux type OS user :: Head over to the
-     [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this repo to download the statically linked
-     binary. Simply download and extract to get the ~ntangle~ binary
-     and put it anywhere in your PATH.
-- Other OSes :: Follow the [[#development][Development]] section below to build the
-                binary locally on your OS.
+- 64-bit GNU/Linux type OS :: Head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this
+     repo to download the release archive
+     ~ntangle-VERSION.Linux_64bit_musl.tar.xz~. Then simply extract it
+     to get the statically linked binary ~ntangle~ and run it.
+- Other OSes :: The statically linked binary is available only for
+                64-bit GNU/Linux type OS. Follow the [[#development][Development]]
+                section below to build the binary locally for your OS.
 * Usage
 #+begin_example
 ntangle FILE.org
@@ -32,26 +33,25 @@ Org file.
 [[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
 installation. Think of it as the equivalent of ~pip~ in Python.
 
-With Nim/~nimble~ installed, do:
+With Nim and ~nimble~ installed, do:
 #+begin_example
 git clone https://github.com/OrgTangle/ntangle
 cd ntangle
-nimble build # creates the ntangle binary in the git repo root dir
+nimble build -d:release # creates the ntangle binary in the same directory
 #+end_example
 ** Installing
-If you want to install it (will build the binary and copy it to
+If you want to install it (i.e. build the binary and copy it to
 =~/.nimble/bin/=), do:
 #+begin_example
 # cd to the git repo dir
 nimble install
 #+end_example
 
-/You need to have added =~/.nimble/bin/= to your ~PATH~ environment
-variable.
+/You need add =~/.nimble/bin/= to your ~PATH~ environment variable./
 ** Testing
 #+begin_src shell :results output verbatim
-cd tests
-./test.sh
+# cd to the git repo dir
+./tests/test.sh
 #+end_src
 
 # #+RESULTS:
