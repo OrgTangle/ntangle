@@ -1,4 +1,4 @@
-# Time-stamp: <2018-06-13 13:32:59 kmodi>
+# Time-stamp: <2018-10-03 11:43:36 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -99,7 +99,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
     of "tangle":
       let (dir, basename, _) = splitFile(orgFile)
       dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
-      var outfile: string = nil
+      var outfile = ""
       case argval
       of "yes":
         outfile = dir / basename & "." & currentLang #For now, set the extension = currentLang, works for nim, org, but not everything
@@ -109,7 +109,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
         outfile = argval
         if (not outfile.startsWith "/"): # if relative path
           outfile = dir / outfile
-      if (not outfile.isNil):
+      if outfile != "":
         outFileName = outfile
         dbg "line {lnum}: buffering enabled for {outFileName}"
         bufEnabled = true
