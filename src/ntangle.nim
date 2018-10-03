@@ -1,4 +1,5 @@
-# Time-stamp: <2018-10-03 16:39:43 kmodi>
+# NTangle - Basic tangling of Org documents
+# https://github.com/OrgTangle/ntangle
 
 import os, strformat, strutils, tables
 
@@ -284,7 +285,7 @@ proc ntangle(orgFiles: seq[string]) =
 when isMainModule:
   import cligen
   dispatchGen(ntangle
-              , version = ("version", "0.2.1"))
+              , version = ("version", "0.2.2"))
   if paramCount()==0:
     quit(dispatch_ntangle(@["--help"]))
   else:
