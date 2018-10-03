@@ -1,4 +1,4 @@
-# Time-stamp: <2018-10-03 12:54:54 kmodi>
+# Time-stamp: <2018-10-03 15:54:17 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -42,22 +42,6 @@ var
   bufEnabled: bool
   firstLineSrcBlock = false
   blockIndent = 0
-
-proc getFileName(): string =
-  ##Get the first command line argument as the file name
-  let
-    numParams = paramCount()
-    params = commandLineParams()
-  dbg "numParams = {numParams}"
-  dbg "params = {params}"
-
-  if numParams == 0:
-    raise newException(UserError, "File to be tangled needs to be passed as argument")
-  elif numParams >= 1:
-    if numParams > 1:
-      echo """WARNING: Only the first argument is used as the file name,
-the remaining arguments will be discarded."""
-    result = params[0]
 
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
@@ -111,7 +95,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
           outfile = dir / outfile
       if outfile != "":
         outFileName = outfile
-        dbg "line {lnum}: buffering enabled for {outFileName}"
+        dbg "line {lnum}: buffering enabled for `{outFileName}'"
         bufEnabled = true
         firstLineSrcBlock = true
     of "padline":
@@ -217,7 +201,7 @@ proc lineAction(line: string, lnum: int) =
   if bufEnabled:
     if (lineParts[0].toLowerAscii.strip() == "#+end_src"):
       bufEnabled = false
-      dbg "line {lnum}: buffering disabled for {outFileName}"
+      dbg "line {lnum}: buffering disabled for `{outFileName}'"
     else:
       dbg "  {lineParts.len} parts: {lineParts}", dvHigh
 
@@ -243,24 +227,25 @@ proc lineAction(line: string, lnum: int) =
       parseTangleHeaderProperties(lineParts[1 .. lineParts.high], lnum)
 
 proc writeFiles() =
-  ## Write the files from ``fileData``
+  ## Write the files from ``fileData``.
   for file, data in fileData:
+    dbg "  Tangling to `{file}' .."
+    let
+      (outDir, _, _) = splitFile(file)
     var
       dataUpdated = data
-      (outDir, _, _) = splitFile(file)
-
-    dbg "outDir: `{outDir}'"
+    dbg "  outDir: `{outDir}'"
     if outDir != "":
       if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
         echo fmt"  Creating {outDir} .."
         createDir(outDir)
       if (not dirExists(outDir)):
-        raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")
+        raise newException(IOError, fmt"Unable to write to `{file}'; `{outDir}' does not exist")
 
     if tangleProperties[file].shebang != "":
       dataUpdated = tangleProperties[file].shebang & "\n" & data
       dbg "{file}: <<{dataUpdated}>>"
-    echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
+    echo fmt"  Writing `{file}' ({dataUpdated.countLines} lines) .."
     writeFile(file, dataUpdated)
     if tangleProperties[file].permissions != {}:
       file.setFilePermissions(tangleProperties[file].permissions)
@@ -269,8 +254,8 @@ proc writeFiles() =
       # permissions (as Org does too).
       file.inclFilePermissions({fpUserExec})
 
-proc doTangle() =
-  orgFile = getFileName()
+proc doTangle(file: string) =
+  orgFile = file
   echo fmt"Parsing {orgFile} .."
   var lnum = 1
   for line in lines(orgFile):
@@ -279,16 +264,20 @@ proc doTangle() =
     inc lnum
   writeFiles()
 
-proc ntangle() =
-  ##NTangle 0.1.0
-
+proc ntangle(orgFiles: seq[string]) =
+  ## Main
   try:
-    doTangle()
+    if orgFiles.len == 0:
+      raise newException(UserError, fmt"Missing the mandatory Org file path. See `ntangle --help'.")
+    for f in orgFiles:
+      fileData.clear() # Reset the fileData before reading a new Org file
+      doTangle(f)
+      echo ""
   except:
     stderr.writeLine "  [ERROR] " & getCurrentExceptionMsg() & "\n"
     quit 1
-  finally:
-    echo ""
 
 when isMainModule:
-  ntangle()
+  import cligen
+  dispatch(ntangle
+           , version = ("version", "0.1.1"))
