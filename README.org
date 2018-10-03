@@ -17,17 +17,30 @@ tangling*.
                 64-bit GNU/Linux type OS. Follow the [[#development][Development]]
                 section below to build the binary locally for your OS.
 * Usage
+Add one or more file or directory names after the ~ntangle~ command.
 #+begin_example
-ntangle FILE.org
+ntangle <FILE>
 #+end_example
 
-or
+or a list of files:
 
 #+begin_example
-ntangle FILE1.org FILE2.org ..
+ntangle <FILE1> <FILE2> ..
 #+end_example
-The tangled files will be created relative to the /FILE.org/ source
-Org file.
+
+or a list of directories:
+
+#+begin_example
+ntangle <DIR1> <DIR2> ..
+#+end_example
+
+or a mix of lists of files and directories:
+
+#+begin_example
+ntangle <FILE1> <DIR1> <FILE2> <DIR2> ..
+#+end_example
+
+The tangled files will be created relative to the source Org file.
 * Development
 ** Building
 [[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim

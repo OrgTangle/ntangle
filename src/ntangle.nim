@@ -274,11 +274,22 @@ proc doTangle(file: string) =
   writeFiles()
   echo ""
 
-proc ntangle(orgFiles: seq[string]) =
+proc ntangle(orgFilesOrDirs: seq[string]) =
   ## Main
   try:
-    for f in orgFiles:
-      doTangle(f)
+    for f1 in orgFilesOrDirs:
+      let
+        f1IsFile = f1.fileExists and (not f1.dirExists)
+        f1IsDir = f1.dirExists and (not f1.fileExists)
+      dbg "is {f1} a directory? {f1IsDir}"
+      dbg "is {f1} a file? {f1IsFile}"
+      if f1IsFile:
+        doTangle(f1)
+      elif f1IsDir:
+        for f2 in f1.walkDirRec:
+          doTangle(f2)
+      else:
+        raise newException(UserError, fmt("{f1} is neither a valid file nor a directory"))
   except:
     stderr.writeLine "  [ERROR] " & getCurrentExceptionMsg() & "\n"
     quit 1
