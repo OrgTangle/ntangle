@@ -1,4 +1,4 @@
-# Time-stamp: <2018-10-03 15:58:43 kmodi>
+# Time-stamp: <2018-10-03 16:22:01 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -280,4 +280,4 @@ proc ntangle(orgFiles: seq[string]) =
 when isMainModule:
   import cligen
   dispatch(ntangle
-           , version = ("version", "0.2.0"))
+           , version = ("version", "0.2.1"))
