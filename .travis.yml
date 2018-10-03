@@ -60,7 +60,8 @@ script:
   # Ensure that you are in repo/build root now.
   - cd "${TRAVIS_BUILD_DIR}"
   # Compile the static binary using musl.
-  - nimble install --depsOnly
+  # --accept to say Yes to prompts like "Prompt: No local packages.json found, download it from internet? [y/N]"
+  - nimble install --depsOnly --accept
   - nim musl "${NIMFILE}"
   # See that the binary is not dynamic.
   - ldd "${BINFILE}" || true
