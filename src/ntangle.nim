@@ -267,8 +267,6 @@ proc doTangle(file: string) =
 proc ntangle(orgFiles: seq[string]) =
   ## Main
   try:
-    if orgFiles.len == 0:
-      raise newException(UserError, fmt"Missing the mandatory Org file path. See `ntangle --help'.")
     for f in orgFiles:
       fileData.clear() # Reset the fileData before reading a new Org file
       doTangle(f)
@@ -279,5 +277,9 @@ proc ntangle(orgFiles: seq[string]) =
 
 when isMainModule:
   import cligen
-  dispatch(ntangle
-           , version = ("version", "0.2.1"))
+  dispatchGen(ntangle
+              , version = ("version", "0.2.1"))
+  if paramCount()==0:
+    quit(dispatch_ntangle(@["--help"]))
+  else:
+    quit(dispatch_ntangle(commandLineParams()))
