@@ -57,10 +57,6 @@ cd tests
 # #+RESULTS:
 
 #+begin_example
-  Verifying dependencies for ntangle@0.1.1
-      Info: Dependency on cligen@>= 0.9.16 already satisfied
-  Verifying dependencies for cligen@0.9.16
-   Building ntangle/ntangle using c backend
 Parsing tests/test1/test1.org ..
   Writing `tests/test1/test_passing.nim' (8 lines) ..
   Writing `tests/test1/test_failing.nim' (8 lines) ..

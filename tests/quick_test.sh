@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: ./quick_test.sh
 
-version="v0.1.1"
+version="v0.2.0"
 temp_dir="/tmp/${USER}/ntangle/quick"
 test="tangle_no_yes"
 
