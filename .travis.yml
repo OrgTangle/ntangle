@@ -59,14 +59,10 @@ install:
 script:
   # Ensure that you are in repo/build root now.
   - cd "${TRAVIS_BUILD_DIR}"
-  - echo "NIMFILE = ${NIMFILE}"
-  - echo "BINFILE = ${BINFILE}"
   # Compile the static binary using musl.
   - nim musl "${NIMFILE}"
   # See that the binary is not dynamic.
   - ldd "${BINFILE}" || true
-  # Run the binary.
-  - "${BINFILE}"
 
 before_deploy:
   - cd "${TRAVIS_BUILD_DIR}"
