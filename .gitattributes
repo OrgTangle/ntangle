@@ -1,3 +1,2 @@
 # https://github.com/github/linguist#vendored-code
 tests/* linguist-vendored
-python/* linguist-vendored
