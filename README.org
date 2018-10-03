@@ -81,7 +81,11 @@ Parsing tests/shebang.org ..
   Writing tests/echo.sh (3 lines) ..
 
 Parsing tests/missing_arg_value.org ..
+  [ERROR] Line 1 - The header arg ':tangle' is missing its value.
+
 Parsing tests/mkdirp_no.org ..
+  [ERROR] Unable to write to tests/./foo/bar/mkdirp_test.sh; tests/./foo/bar does not exist
+
 Parsing tests/mkdirp_yes.org ..
   Creating tests/./foo/bar ..
   Writing tests/./foo/bar/mkdirp_test.sh (2 lines) ..

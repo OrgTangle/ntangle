@@ -1,4 +1,4 @@
-# Time-stamp: <2018-10-03 11:43:36 kmodi>
+# Time-stamp: <2018-10-03 12:54:54 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -248,23 +248,26 @@ proc writeFiles() =
     var
       dataUpdated = data
       (outDir, _, _) = splitFile(file)
+
+    dbg "outDir: `{outDir}'"
+    if outDir != "":
+      if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
+        echo fmt"  Creating {outDir} .."
+        createDir(outDir)
+      if (not dirExists(outDir)):
+        raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")
+
     if tangleProperties[file].shebang != "":
       dataUpdated = tangleProperties[file].shebang & "\n" & data
-    dbg "{file}: <<{dataUpdated}>>"
-    if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
-      echo fmt"  Creating {outDir} .."
-      createDir(outDir)
-    if dirExists(outDir):
-      echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
-      writeFile(file, dataUpdated)
-      if tangleProperties[file].permissions != {}:
-        file.setFilePermissions(tangleProperties[file].permissions)
-      elif tangleProperties[file].shebang != "":
-        # If a tangled file has a shebang, auto-add user executable
-        # permissions (as Org does too).
-        file.inclFilePermissions({fpUserExec})
-    else:
-      raise newException(IOError, fmt"Unable to write to {file}; {outDir} does not exist")
+      dbg "{file}: <<{dataUpdated}>>"
+    echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
+    writeFile(file, dataUpdated)
+    if tangleProperties[file].permissions != {}:
+      file.setFilePermissions(tangleProperties[file].permissions)
+    elif tangleProperties[file].shebang != "":
+      # If a tangled file has a shebang, auto-add user executable
+      # permissions (as Org does too).
+      file.inclFilePermissions({fpUserExec})
 
 proc doTangle() =
   orgFile = getFileName()
