@@ -1,4 +1,4 @@
-# Time-stamp: <2018-10-03 16:22:01 kmodi>
+# Time-stamp: <2018-10-03 16:39:43 kmodi>
 
 import os, strformat, strutils, tables
 
@@ -228,6 +228,12 @@ proc lineAction(line: string, lnum: int) =
 
 proc writeFiles() =
   ## Write the files from ``fileData``.
+  dbg "fileData elements: {fileData.len}"
+  dbg "fileData: {fileData}"
+  if fileData.len == 0:
+    echo fmt"  No tangle blocks found"
+    return
+
   for file, data in fileData:
     dbg "  Tangling to `{file}' .."
     let
