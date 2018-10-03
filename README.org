@@ -2,15 +2,27 @@
 
 Basic tangling of Org documents using Nim.
 
-* History
-The ~ntangle.nim~ file was written as an exercise to roughly translate the
-Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
-* Caution
-I do not recommend using this for tangling Org files. It worked well for the
-lightly tested file in the ~test/~ dir of this repo.
+- Note :: ~ntangle~ works well for the lightly tested files in the
+          ~test/~ dir of this repo. See the [[#limitations][Limitations]] section below.
 
-See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]] section for *real Org tangling*.
-* Building
+See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]] section for *real Org
+tangling*.
+
+* Download binary
+- 64-bit GNU/Linux type OS user :: Head over to the
+     [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this repo to download the statically linked
+     binary. Simply download and extract to get the ~ntangle~ binary
+     and put it anywhere in your PATH.
+- Other OSes :: Follow the [[#development][Development]] section below to build the
+                binary locally on your OS.
+* Usage
+#+begin_example
+ntangle FILE.org
+#+end_example
+The tangled files will be created relative to the /FILE.org/ source
+Org file.
+* Development
+** Building
 [[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
 installation. Think of it as the equivalent of ~pip~ in Python.
 
@@ -20,7 +32,7 @@ git clone https://github.com/OrgTangle/ntangle
 cd ntangle
 nimble build # creates the ntangle binary in the git repo root dir
 #+end_example
-* Installing
+** Installing
 If you want to install it (will build the binary and copy it to
 =~/.nimble/bin/=), do:
 #+begin_example
@@ -30,7 +42,7 @@ nimble install
 
 /You need to have added =~/.nimble/bin/= to your ~PATH~ environment
 variable.
-* Testing
+** Testing
 #+begin_src shell :results output verbatim
 cd tests
 ./test.sh
@@ -80,7 +92,6 @@ Parsing tests/tangle_mode.org ..
   Writing tests/file_permissions_755 (2 lines) ..
 
 #+end_example
-
 * Limitations
 I wouldn't be surprised if there are many more limitations than the
 few listed below:
@@ -90,3 +101,8 @@ few listed below:
   support.. I use it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
 - A lot of other tangle options.. Visit ~(org) Extracting Source Code~
   Info manual node.
+* History
+The ~ntangle.nim~ file was written as an exercise to roughly translate the
+Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
+* Other Org tangling implementations
+See [[https://github.com/OrgTangle]].
