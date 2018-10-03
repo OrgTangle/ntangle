@@ -262,6 +262,8 @@ proc writeFiles() =
       file.inclFilePermissions({fpUserExec})
 
 proc doTangle(file: string) =
+  fileData.clear() # Reset the fileData before reading a new Org file
+  tangleProperties.clear() # Reset the tangleProperties before reading a new Org file
   orgFile = file
   echo fmt"Parsing {orgFile} .."
   var lnum = 1
@@ -270,14 +272,13 @@ proc doTangle(file: string) =
     lineAction(line, lnum)
     inc lnum
   writeFiles()
+  echo ""
 
 proc ntangle(orgFiles: seq[string]) =
   ## Main
   try:
     for f in orgFiles:
-      fileData.clear() # Reset the fileData before reading a new Org file
       doTangle(f)
-      echo ""
   except:
     stderr.writeLine "  [ERROR] " & getCurrentExceptionMsg() & "\n"
     quit 1
