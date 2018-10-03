@@ -41,7 +41,7 @@ install:
       )"
   - "{ [ -f ${NIMDIR}/bin/nimble ]; } ||
       ( cd ${NIMDIR};
-        ./koch tools;
+        ./koch nimble;
       )"
   - export PATH="${NIMDIR}/bin:${PATH}"
   - nim -v
