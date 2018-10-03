@@ -16,7 +16,7 @@ installation. Think of it as the equivalent of ~pip~ in Python.
 
 With Nim/~nimble~ installed, do:
 #+begin_example
-git clone https://github.com/kaushalmodi/ntangle
+git clone https://github.com/OrgTangle/ntangle
 cd ntangle
 nimble build # creates the ntangle binary in the git repo root dir
 #+end_example
