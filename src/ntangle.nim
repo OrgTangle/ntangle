@@ -1,7 +1,7 @@
 # NTangle - Basic tangling of Org documents
 # https://github.com/OrgTangle/ntangle
 
-import os, strformat, strutils, tables
+import os, strformat, strutils, tables, terminal
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
@@ -163,7 +163,10 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
     of "exports", "results":  #Ignore args not relevant to tangling
       discard
     else:
-      echo fmt"  [WARN] Line {lnum} - ':{arg}' header argument is not supported at the moment."
+      styledEcho(fgYellow, "  [WARN] ",
+                 fgDefault, "Line ",
+                 styleBright, $lnum,
+                 resetStyle, fmt" - ':{arg}' header argument is not supported at the moment.")
       discard
     # of "":
     #   case argval
@@ -244,15 +247,15 @@ proc writeFiles() =
     dbg "  outDir: `{outDir}'"
     if outDir != "":
       if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
-        echo fmt"  Creating {outDir} .."
+        echo fmt"  Creating {outDir}/ .."
         createDir(outDir)
       if (not dirExists(outDir)):
-        raise newException(IOError, fmt"Unable to write to `{file}'; `{outDir}' does not exist")
+        raise newException(IOError, fmt"Unable to write to `{file}'. `{outDir}/' directory does not exist.")
 
     if tangleProperties[file].shebang != "":
       dataUpdated = tangleProperties[file].shebang & "\n" & data
       dbg "{file}: <<{dataUpdated}>>"
-    echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
+    styledEcho("  Writing ", fgGreen, file, fgDefault, fmt" ({dataUpdated.countLines} lines) ..")
     writeFile(file, dataUpdated)
     if tangleProperties[file].permissions != {}:
       file.setFilePermissions(tangleProperties[file].permissions)
@@ -267,7 +270,7 @@ proc doOrgTangle(file: string) =
     fileData.clear() # Reset the fileData before reading a new Org file
     tangleProperties.clear() # Reset the tangleProperties before reading a new Org file
     orgFile = file
-    echo fmt"Parsing {orgFile} .."
+    styledEcho("Parsing ", styleBright, orgFile, resetStyle, " ..")
     var lnum = 1
     for line in lines(orgFile):
       dbg "{lnum}: {line}", dvHigh
@@ -294,7 +297,7 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
       else:
         raise newException(UserError, fmt("{f1} is neither a valid file nor a directory"))
   except:
-    stderr.writeLine "  [ERROR] " & getCurrentExceptionMsg() & "\n"
+    stderr.styledWriteLine(fgRed, "  [ERROR] ", fgDefault, getCurrentExceptionMsg() & "\n")
     quit 1
 
 when isMainModule:
