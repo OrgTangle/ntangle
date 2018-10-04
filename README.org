@@ -84,10 +84,12 @@ Parsing tests/tangle_no_yes/tangle_no_yes.org ..
   Writing tests/tangle_no_yes/tangle_no_yes.nim (2 lines) ..
   Writing tests/tangle_no_yes/specified_file.nim (2 lines) ..
 
+Entering directory tests/src_blocks_with_extra_indentation/ ..
 Parsing tests/src_blocks_with_extra_indentation/src_blocks_with_extra_indentation.org ..
   Writing tests/src_blocks_with_extra_indentation/hi2.nim (3 lines) ..
   Writing tests/src_blocks_with_extra_indentation/hello2.nim (3 lines) ..
 
+Entering directory tests/multiple_src_blocks_tangled_to_same_file/ ..
 Parsing tests/multiple_src_blocks_tangled_to_same_file/multiple_src_blocks_tangled_to_same_file.org ..
   Writing tests/multiple_src_blocks_tangled_to_same_file/hi.nim (3 lines) ..
   Writing tests/multiple_src_blocks_tangled_to_same_file/hello.nim (3 lines) ..
@@ -107,7 +109,7 @@ Parsing tests/missing_arg_value/missing_arg_value.org ..
   [ERROR] Line 1 - The header arg ':tangle' is missing its value.
 
 Parsing tests/mkdirp_no/mkdirp_no.org ..
-  [ERROR] Unable to write to `tests/mkdirp_no/./foo/bar/mkdirp_test.sh'; `tests/mkdirp_no/./foo/bar' does not exist
+  [ERROR] Unable to write to `tests/mkdirp_no/./foo/bar/mkdirp_test.sh'. `tests/mkdirp_no/./foo/bar/' directory does not exist.
 
 Parsing tests/mkdirp_yes/mkdirp_yes.org ..
   Writing tests/mkdirp_yes/./foo/bar/mkdirp_test.sh (2 lines) ..

@@ -291,7 +291,7 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
       if f1IsFile:
         doOrgTangle(f1)
       elif f1IsDir:
-        echo fmt"Entering directory {f1} .."
+        styledEcho("Entering directory ", styleBright, f1 / "", resetStyle, " ..")
         for f2 in f1.walkDirRec:
           doOrgTangle(f2)
       else:
