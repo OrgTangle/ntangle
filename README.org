@@ -66,7 +66,7 @@ If you want to install it (i.e. build the binary and copy it to
 nimble install
 #+end_example
 
-/You need add =~/.nimble/bin/= to your ~PATH~ environment variable./
+You need to add *~/.nimble/bin/* to your ~PATH~ environment variable.
 ** Testing
 #+begin_src shell :results output verbatim
 # cd to the git repo dir
