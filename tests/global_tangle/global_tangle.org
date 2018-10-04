@@ -1,0 +1,17 @@
+#+property: header-args :tangle yes
+
+#+begin_src nim
+echo "this will be tangled to global_tangle.nim"
+#+end_src
+
+#+begin_src nim :tangle no
+echo "this block won't get tangled"
+#+end_src
+
+#+begin_src nim :tangle yes
+echo "this will be tangled and appended to the first block tangled above"
+#+end_src
+
+#+begin_src nim :tangle specified_file.nim
+echo "this will be tangled to specified_file.nim"
+#+end_src
