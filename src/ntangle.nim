@@ -252,7 +252,7 @@ proc writeFiles() =
     if tangleProperties[file].shebang != "":
       dataUpdated = tangleProperties[file].shebang & "\n" & data
       dbg "{file}: <<{dataUpdated}>>"
-    echo fmt"  Writing `{file}' ({dataUpdated.countLines} lines) .."
+    echo fmt"  Writing {file} ({dataUpdated.countLines} lines) .."
     writeFile(file, dataUpdated)
     if tangleProperties[file].permissions != {}:
       file.setFilePermissions(tangleProperties[file].permissions)
@@ -286,6 +286,7 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
       if f1IsFile:
         doTangle(f1)
       elif f1IsDir:
+        echo fmt"Entering directory {f1} .."
         for f2 in f1.walkDirRec:
           doTangle(f2)
       else:
