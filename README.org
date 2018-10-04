@@ -8,6 +8,8 @@ Basic tangling of Org documents using Nim.
 See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]] section for *real Org
 tangling*.
 
+*You do not need Emacs or Org mode installed to use this tool.*
+
 * Download binary
 - 64-bit GNU/Linux type OS :: Head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this
      repo to download the release archive
@@ -17,15 +19,18 @@ tangling*.
                 64-bit GNU/Linux type OS. Follow the [[#development][Development]]
                 section below to build the binary locally for your OS.
 * Usage
-Add one or more file or directory names after the ~ntangle~ command.
+Add one or more Org files (files with names ending in ".org") or
+directory names after the ~ntangle~ command. If directory names are
+added, only the files in there with names ending with ".org" will be
+parsed.
 #+begin_example
-ntangle <FILE>
+ntangle <FILE.org>
 #+end_example
 
 or a list of files:
 
 #+begin_example
-ntangle <FILE1> <FILE2> ..
+ntangle <FILE1.org> <FILE2.org> ..
 #+end_example
 
 or a list of directories:
@@ -37,10 +42,11 @@ ntangle <DIR1> <DIR2> ..
 or a mix of lists of files and directories:
 
 #+begin_example
-ntangle <FILE1> <DIR1> <FILE2> <DIR2> ..
+ntangle <FILE1.org> <DIR1> <FILE2.org> <DIR2> ..
 #+end_example
 
-The tangled files will be created relative to the source Org file.
+The tangled files will be created in paths relative to the source Org
+file.
 * Development
 ** Building
 [[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
@@ -70,32 +76,32 @@ nimble install
 # #+RESULTS:
 
 #+begin_example
-Parsing tests/test1/test1.org ..
-  Writing `tests/test1/test_passing.nim' (8 lines) ..
-  Writing `tests/test1/test_failing.nim' (8 lines) ..
+Parsing tests/test1/test1.ORG ..
+  Writing tests/test1/test_passing.nim (8 lines) ..
+  Writing tests/test1/test_failing.nim (8 lines) ..
 
 Parsing tests/tangle_no_yes/tangle_no_yes.org ..
-  Writing `tests/tangle_no_yes/tangle_no_yes.nim' (2 lines) ..
-  Writing `tests/tangle_no_yes/specified_file.nim' (2 lines) ..
+  Writing tests/tangle_no_yes/tangle_no_yes.nim (2 lines) ..
+  Writing tests/tangle_no_yes/specified_file.nim (2 lines) ..
 
 Parsing tests/src_blocks_with_extra_indentation/src_blocks_with_extra_indentation.org ..
-  Writing `tests/src_blocks_with_extra_indentation/hi2.nim' (3 lines) ..
-  Writing `tests/src_blocks_with_extra_indentation/hello2.nim' (3 lines) ..
+  Writing tests/src_blocks_with_extra_indentation/hi2.nim (3 lines) ..
+  Writing tests/src_blocks_with_extra_indentation/hello2.nim (3 lines) ..
 
 Parsing tests/multiple_src_blocks_tangled_to_same_file/multiple_src_blocks_tangled_to_same_file.org ..
-  Writing `tests/multiple_src_blocks_tangled_to_same_file/hi.nim' (3 lines) ..
-  Writing `tests/multiple_src_blocks_tangled_to_same_file/hello.nim' (3 lines) ..
+  Writing tests/multiple_src_blocks_tangled_to_same_file/hi.nim (3 lines) ..
+  Writing tests/multiple_src_blocks_tangled_to_same_file/hello.nim (3 lines) ..
 
 Parsing tests/wyag/write-yourself-a-git.org ..
   [WARN] Line 200 - ':noweb' header argument is not supported at the moment.
   [WARN] Line 226 - ':noweb' header argument is not supported at the moment.
   [WARN] Line 339 - ':noweb' header argument is not supported at the moment.
-  Writing `tests/wyag/wyag' (5 lines) ..
-  Writing `tests/wyag/wyag-tests' (104 lines) ..
-  Writing `tests/wyag/libwyag.py' (683 lines) ..
+  Writing tests/wyag/wyag (5 lines) ..
+  Writing tests/wyag/wyag-tests (104 lines) ..
+  Writing tests/wyag/libwyag.py (683 lines) ..
 
 Parsing tests/shebang/shebang.org ..
-  Writing `tests/shebang/echo.sh' (3 lines) ..
+  Writing tests/shebang/echo.sh (3 lines) ..
 
 Parsing tests/missing_arg_value/missing_arg_value.org ..
   [ERROR] Line 1 - The header arg ':tangle' is missing its value.
@@ -104,12 +110,12 @@ Parsing tests/mkdirp_no/mkdirp_no.org ..
   [ERROR] Unable to write to `tests/mkdirp_no/./foo/bar/mkdirp_test.sh'; `tests/mkdirp_no/./foo/bar' does not exist
 
 Parsing tests/mkdirp_yes/mkdirp_yes.org ..
-  Writing `tests/mkdirp_yes/./foo/bar/mkdirp_test.sh' (2 lines) ..
+  Writing tests/mkdirp_yes/./foo/bar/mkdirp_test.sh (2 lines) ..
 
 Parsing tangle_mode.org ..
-  Writing `file_permissions_755' (2 lines) ..
-  Writing `file_permissions_600_override_shebang' (3 lines) ..
-  Writing `file_permissions_644' (2 lines) ..
+  Writing file_permissions_755 (2 lines) ..
+  Writing file_permissions_600_override_shebang (3 lines) ..
+  Writing file_permissions_644 (2 lines) ..
 #+end_example
 * Limitations
 I wouldn't be surprised if there are many more limitations than the

@@ -261,18 +261,20 @@ proc writeFiles() =
       # permissions (as Org does too).
       file.inclFilePermissions({fpUserExec})
 
-proc doTangle(file: string) =
-  fileData.clear() # Reset the fileData before reading a new Org file
-  tangleProperties.clear() # Reset the tangleProperties before reading a new Org file
-  orgFile = file
-  echo fmt"Parsing {orgFile} .."
-  var lnum = 1
-  for line in lines(orgFile):
-    dbg "{lnum}: {line}", dvHigh
-    lineAction(line, lnum)
-    inc lnum
-  writeFiles()
-  echo ""
+proc doOrgTangle(file: string) =
+  ## Tangle Org file ``file``.
+  if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
+    fileData.clear() # Reset the fileData before reading a new Org file
+    tangleProperties.clear() # Reset the tangleProperties before reading a new Org file
+    orgFile = file
+    echo fmt"Parsing {orgFile} .."
+    var lnum = 1
+    for line in lines(orgFile):
+      dbg "{lnum}: {line}", dvHigh
+      lineAction(line, lnum)
+      inc lnum
+    writeFiles()
+    echo ""
 
 proc ntangle(orgFilesOrDirs: seq[string]) =
   ## Main
@@ -284,11 +286,11 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
       dbg "is {f1} a directory? {f1IsDir}"
       dbg "is {f1} a file? {f1IsFile}"
       if f1IsFile:
-        doTangle(f1)
+        doOrgTangle(f1)
       elif f1IsDir:
         echo fmt"Entering directory {f1} .."
         for f2 in f1.walkDirRec:
-          doTangle(f2)
+          doOrgTangle(f2)
       else:
         raise newException(UserError, fmt("{f1} is neither a valid file nor a directory"))
   except:
