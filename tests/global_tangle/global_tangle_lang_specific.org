@@ -1,0 +1,10 @@
+#+property: header-args:nim :tangle yes
+#+property: header-args :tangle no
+
+#+begin_src nim
+echo "this will be tangled to global_tangle.nim"
+#+end_src
+
+#+begin_src shell
+echo "this will not be tangled"
+#+end_src
