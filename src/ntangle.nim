@@ -25,7 +25,11 @@ const
     "shell" : "sh",
     "bash" : "sh",
     "tcsh" : "csh",
-    "rust" : "rs"
+    "rust" : "rs",
+    "python" : "py",
+    "python3" : "py",
+    "ipython" : "py",
+    "ipython3" : "py"
   }.toTable
 dbg "{tangledExt}"
 
