@@ -6,8 +6,8 @@ import os, strformat, strutils, tables, terminal, sequtils
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
 
-const DebugVerbosityLevel = dvLow
-# const DebugVerbosityLevel = dvNone
+# const DebugVerbosityLevel = dvLow
+const DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow, prefix = "[DBG] ") =
   when DebugVerbosityLevel >= dvLow:
     case DebugVerbosityLevel
