@@ -42,21 +42,21 @@ var
   orgFile: string
   orgLevel: Natural
   fileData = initTable[string, string]() # file, data
-  tangleHeaderArgsDefaults = initTangleHeaderArgs()
+  headerArgsDefaults = initTangleHeaderArgs()
   outFileName: string
-  tangleProperties = initTable[string, HeaderArgs]() # file, header args
+  fileHeaderArgs = initTable[string, HeaderArgs]() # file, header args
   bufEnabled: bool
   firstLineSrcBlock = false
   blockIndent = 0
 
 proc resetTangleHeaderArgsDefault() =
-  tangleHeaderArgsDefaults.clear()
+  headerArgsDefaults.clear()
   # Default tangle header args for all Org levels and languages.
-  tangleHeaderArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
-                                                         padline : true,
-                                                         shebang : "",
-                                                         mkdirp : false,
-                                                         permissions : {})
+  headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
+                                                   padline : true,
+                                                   shebang : "",
+                                                   mkdirp : false,
+                                                   permissions : {})
 
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
@@ -82,15 +82,15 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   let (dir, basename, _) = splitFile(orgFile)
   dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
   var
-    prop: HeaderArgs
+    hArgs: HeaderArgs
     outfile = ""
   if lang != "":
     outfile = dir / basename & "." & lang #For now, set the extension = lang, works for nim, org, but not everything
 
   try:
-    prop = tangleProperties[outFileName]
-  except KeyError: #If tangleProperties does not already exist for the current output file
-    prop = tangleHeaderArgsDefaults[(0.Natural, "")]
+    hArgs = fileHeaderArgs[outFileName]
+  except KeyError: #If fileHeaderArgs does not already exist for the current output file
+    hArgs = headerArgsDefaults[(0.Natural, "")]
 
   for hdrArg in hdrArgs:
     let
@@ -103,7 +103,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     dbg "arg={arg}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
     case arg
     of "tangle":
-      prop.tangle = argval
+      hArgs.tangle = argval
       case argval
       of "yes":
         discard
@@ -116,19 +116,19 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     of "padline":
       case argval
       of "yes":
-        prop.padline = true
+        hArgs.padline = true
       of "no":
-        prop.padline = false
+        hArgs.padline = false
       else:
         raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
     of "shebang":
-      prop.shebang = argval
+      hArgs.shebang = argval
     of "mkdirp":
       case argval
       of "yes":
-        prop.mkdirp = true
+        hArgs.mkdirp = true
       of "no":
-        prop.mkdirp = false
+        hArgs.mkdirp = false
       else:
         raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
     of "tangle-mode":
@@ -141,7 +141,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
         octalPermOwner = octalPerm[1][0]
         octalPermGroup = octalPerm[1][1]
         octalPermOther = octalPerm[1][2]
-      prop.permissions = parseFilePermissions(octalPermOwner & octalPermGroup & octalPermOther)
+      hArgs.permissions = parseFilePermissions(octalPermOwner & octalPermGroup & octalPermOther)
     # of "comments":
     #   case argval
     #   of "yes":
@@ -155,9 +155,9 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     # of "no-expand":
     #   case argval
     #   of "yes":
-    #     prop.no-expand = true
+    #     hArgs.no-expand = true
     #   of "no":
-    #     prop.no-expand = false
+    #     hArgs.no-expand = false
     #   else:
     #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
     # of "noweb":
@@ -188,18 +188,20 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     #   of "no":
     #   else:
     #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
-    # Save the updated prop to the global tables.
 
-    dbg "xx line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+    # Update the default HeaderArgs for the current orgLevel+lang
+    # scope.
     if (not onBeginSrc):      # global or subtree property
-      tangleHeaderArgsDefaults[(orgLevel, lang)] = prop
+      headerArgsDefaults[(orgLevel, lang)] = hArgs
 
+  # Save the updated hArgs to the file-specific HeaderArgs global
+  # value.
   if outfile != "":
     outFileName = outfile
-    tangleProperties[outFileName] = prop
+    fileHeaderArgs[outFileName] = hArgs
 
   dbg "line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
-  if onBeginSrc and (prop.tangle != "no"):
+  if onBeginSrc and (hArgs.tangle != "no"):
     doAssert outFileName != ""
     dbg "line {lnum}: buffering enabled for `{outFileName}'"
     bufEnabled = true
@@ -277,7 +279,7 @@ proc lineAction(line: string, lnum: int) =
           blockIndent = (line.len - line.strip(trailing=false).len)
 
         try:
-          if firstLineSrcBlock and tangleProperties[outFileName].padline:
+          if firstLineSrcBlock and fileHeaderArgs[outFileName].padline:
             fileData[outFileName].add("\n")
           fileData[outFileName].add(lineAdjust(line, blockIndent))
         except KeyError: # If outFileName key is not yet set in fileData
@@ -308,20 +310,20 @@ proc writeFiles() =
       dataUpdated = data
     dbg "  outDir: `{outDir}'"
     if outDir != "":
-      if (not dirExists(outDir)) and tangleProperties[file].mkdirp:
+      if (not dirExists(outDir)) and fileHeaderArgs[file].mkdirp:
         echo fmt"  Creating {outDir}/ .."
         createDir(outDir)
       if (not dirExists(outDir)):
         raise newException(IOError, fmt"Unable to write to `{file}'. `{outDir}/' directory does not exist.")
 
-    if tangleProperties[file].shebang != "":
-      dataUpdated = tangleProperties[file].shebang & "\n" & data
+    if fileHeaderArgs[file].shebang != "":
+      dataUpdated = fileHeaderArgs[file].shebang & "\n" & data
       dbg "{file}: <<{dataUpdated}>>"
     styledEcho("  Writing ", fgGreen, file, fgDefault, fmt" ({dataUpdated.countLines} lines) ..")
     writeFile(file, dataUpdated)
-    if tangleProperties[file].permissions != {}:
-      file.setFilePermissions(tangleProperties[file].permissions)
-    elif tangleProperties[file].shebang != "":
+    if fileHeaderArgs[file].permissions != {}:
+      file.setFilePermissions(fileHeaderArgs[file].permissions)
+    elif fileHeaderArgs[file].shebang != "":
       # If a tangled file has a shebang, auto-add user executable
       # permissions (as Org does too).
       file.inclFilePermissions({fpUserExec})
@@ -331,7 +333,7 @@ proc doOrgTangle(file: string) =
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
     # Reset all the tables before reading a new Org file.
     fileData.clear()
-    tangleProperties.clear()
+    fileHeaderArgs.clear()
     resetTangleHeaderArgsDefault()
     orgFile = file
     styledEcho("Parsing ", styleBright, orgFile, resetStyle, " ..")
