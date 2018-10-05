@@ -1,13 +1,13 @@
 # NTangle - Basic tangling of Org documents
 # https://github.com/OrgTangle/ntangle
 
-import os, strformat, strutils, tables, terminal
+import os, strformat, strutils, tables, terminal, sequtils
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
 
-# const DebugVerbosityLevel = dvLow
-const DebugVerbosityLevel = dvNone
+const DebugVerbosityLevel = dvLow
+# const DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow) =
   when DebugVerbosityLevel >= dvLow:
     case DebugVerbosityLevel
@@ -22,27 +22,41 @@ template dbg(msg: string, verbosity = dvLow) =
 type
   UserError = object of Exception
   OrgError = object of Exception
-  HeaderProperty = object
+  HeaderArgs = object
+    tangle: string
     padline: bool
     shebang: string
     mkdirp: bool
     permissions: set[FilePermission]
+  GlobalHeaderArgs = tuple
+    lang: string
+    args: string
+  LevelLangIndex = tuple
+    orgLevel: int
+    lang: string
+  TangleHeaderArgs = Table[LevelLangIndex, HeaderArgs] # orgLevel, lang, header args
 
-const
-  tanglePropertiesDefault = HeaderProperty(padline : true,
-                                           shebang : "",
-                                           mkdirp : false,
-                                           permissions : {})
+func initTangleHeaderArgs(): TangleHeaderArgs = initTable[LevelLangIndex, HeaderArgs]()
 
 var
   orgFile: string
+  orgLevel: Natural
   fileData = initTable[string, string]() # file, data
+  tangleHeaderArgsDefault = initTangleHeaderArgs()
   outFileName: string
-  currentLang: string
-  tangleProperties = initTable[string, HeaderProperty]() # lang, properties
+  tangleProperties = initTable[string, HeaderArgs]() # file, header args
   bufEnabled: bool
   firstLineSrcBlock = false
   blockIndent = 0
+
+proc resetTangleHeaderArgsDefault() =
+  tangleHeaderArgsDefault.clear()
+  # Default tangle header args for all Org levels and languages.
+  tangleHeaderArgsDefault[(0, "")] = HeaderArgs(tangle : "no",
+                                                padline : true,
+                                                shebang : "",
+                                                mkdirp : false,
+                                                permissions : {})
 
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
@@ -63,13 +77,20 @@ proc parseFilePermissions(octals: string): set[FilePermission] =
   dbg "permissions = {perm}"
   result = perm
 
-proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
-  ##Org header arguments related to tangling. See (org) Extracting Source Code.
-  var prop: HeaderProperty
+proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, onBeginSrc: bool) =
+  ## Org header arguments related to tangling. See (org) Extracting Source Code.
+  let (dir, basename, _) = splitFile(orgFile)
+  dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
+  var
+    prop: HeaderArgs
+    outfile = ""
+  if lang != "":
+    outfile = dir / basename & "." & lang #For now, set the extension = lang, works for nim, org, but not everything
+
   try:
-    prop = tangleProperties[outFilename]
+    prop = tangleProperties[outFileName]
   except KeyError: #If tangleProperties does not already exist for the current output file
-    prop = tanglePropertiesDefault
+    prop = tangleHeaderArgsDefault[(0, "")]
 
   for hdrArg in hdrArgs:
     let
@@ -79,26 +100,19 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
     let
       arg = hdrArgParts[0]
       argval = hdrArgParts[1].strip(chars={'"'}) #treat :tangle foo.ext and :tangle "foo.ext" the same
-    dbg "arg={arg}, argval={argval}"
+    dbg "arg={arg}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
     case arg
     of "tangle":
-      let (dir, basename, _) = splitFile(orgFile)
-      dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
-      var outfile = ""
+      prop.tangle = argval
       case argval
       of "yes":
-        outfile = dir / basename & "." & currentLang #For now, set the extension = currentLang, works for nim, org, but not everything
+        discard
       of "no":
         bufEnabled = false
       else:               #filename
         outfile = argval
         if (not outfile.startsWith "/"): # if relative path
           outfile = dir / outfile
-      if outfile != "":
-        outFileName = outfile
-        dbg "line {lnum}: buffering enabled for `{outFileName}'"
-        bufEnabled = true
-        firstLineSrcBlock = true
     of "padline":
       case argval
       of "yes":
@@ -174,7 +188,22 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int) =
     #   of "no":
     #   else:
     #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
-    tangleProperties[outFilename] = prop #save the updated prop to the global table
+    # Save the updated prop to the global tables.
+
+    dbg "xx line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+    if (not onBeginSrc):      # global or subtree property
+      tangleHeaderArgsDefault[(orgLevel, lang)] = prop
+
+  if outfile != "":
+    outFileName = outfile
+    tangleProperties[outFileName] = prop
+
+  dbg "line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+  if onBeginSrc and (prop.tangle != "no"):
+    doAssert outFileName != ""
+    dbg "line {lnum}: buffering enabled for `{outFileName}'"
+    bufEnabled = true
+    firstLineSrcBlock = true
 
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
@@ -195,40 +224,73 @@ proc lineAdjust(line: string, indent: int): string =
       else:
         line & "\n"
 
+proc getOrgLevel(line: string): Natural =
+  ## Return the current Org level if ``line`` is an Org heading.
+  ## If not on an Org heading, return 0.
+  ##
+  ## An Org heading has no leading space, and begins with one or more
+  ## ``*`` chars, followed by a space, and heading text.
+  ##
+  ## Examples: "* Heading Level 1", "** Heading Level 2".
+  let
+    lastStarLocation = line.find("* ")
+  if (lastStarLocation >= 0) and
+     line[0 .. lastStarLocation].allCharsInSet({'*'}):
+    return lastStarLocation + 1
+
 proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
   ## On detection of "#+end_src", stop that recording.
-  let lineParts = line.strip.split(":")
-  if firstLineSrcBlock:
-    dbg "  first line of src block"
-  if bufEnabled:
-    if (lineParts[0].toLowerAscii.strip() == "#+end_src"):
-      bufEnabled = false
-      dbg "line {lnum}: buffering disabled for `{outFileName}'"
-    else:
-      dbg "  {lineParts.len} parts: {lineParts}", dvHigh
-
-      # Assume that the first line of every src block has zero
-      # indentation.
-      if firstLineSrcBlock:
-        blockIndent = (line.len - line.strip(trailing=false).len)
-
-      try:
-        if firstLineSrcBlock and tangleProperties[outFilename].padline:
-          fileData[outFileName].add("\n")
-        fileData[outFileName].add(lineAdjust(line, blockIndent))
-      except KeyError: # If outFileName key is not yet set in fileData
-        fileData[outFileName] = lineAdjust(line, blockIndent)
-      dbg "  extra indentation: {blockIndent}"
-      firstLineSrcBlock = false
+  if line.getOrgLevel() > 0:
+    orgLevel = line.getOrgLevel()
+    dbg "orgLevel = {orgLevel}"
+  let
+    lineParts = line.strip.split(":")
+    linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
+    orgKeyword = if (lineParts.len >= 3 and
+                     linePartsLower[0].startsWith("#+") and
+                     (not linePartsLower[0].contains(' '))):
+                   linePartsLower[0]
+                 else:
+                   ""
+  if orgKeyword != "":
+    dbg "Keyword found on line {lnum}:"
+    for i, p in lineParts:
+      dbg "  part {i} = {p}"
+    if ((orgKeyword == "#+property") and
+        (linePartsLower[1].strip() == "header-args")):
+      parseTangleHeaderProperties(lineParts[2 .. lineParts.high], lnum, "", false)
   else:
-    let
-      firstPart = lineParts[0].toLowerAscii.strip
-      firstPartParts = firstPart.split(" ")
-    if (firstPartParts[0] == "#+begin_src") and (firstPartParts.len >= 2): #Line needs to begin with "#+begin_src LANG"
-      currentLang = firstPartParts[1]
-      parseTangleHeaderProperties(lineParts[1 .. lineParts.high], lnum)
+    if firstLineSrcBlock:
+      dbg "  first line of src block"
+    if bufEnabled:
+      if (linePartsLower[0] == "#+end_src"):
+        bufEnabled = false
+        dbg "line {lnum}: buffering disabled for `{outFileName}'"
+      else:
+        dbg "  {lineParts.len} parts: {lineParts}", dvHigh
+
+        # Assume that the first line of every src block has zero
+        # indentation.
+        if firstLineSrcBlock:
+          blockIndent = (line.len - line.strip(trailing=false).len)
+
+        try:
+          if firstLineSrcBlock and tangleProperties[outFileName].padline:
+            fileData[outFileName].add("\n")
+          fileData[outFileName].add(lineAdjust(line, blockIndent))
+        except KeyError: # If outFileName key is not yet set in fileData
+          fileData[outFileName] = lineAdjust(line, blockIndent)
+        dbg "  extra indentation: {blockIndent}"
+        firstLineSrcBlock = false
+    else:
+      let
+        firstPartParts = linePartsLower[0].split(" ")
+      if (firstPartParts[0] == "#+begin_src") and (firstPartParts.len >= 2): #Line needs to begin with "#+begin_src LANG"
+        let
+          lang = firstPartParts[1]
+        parseTangleHeaderProperties(lineParts[1 .. lineParts.high], lnum, lang, true)
 
 proc writeFiles() =
   ## Write the files from ``fileData``.
@@ -267,8 +329,10 @@ proc writeFiles() =
 proc doOrgTangle(file: string) =
   ## Tangle Org file ``file``.
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
-    fileData.clear() # Reset the fileData before reading a new Org file
-    tangleProperties.clear() # Reset the tangleProperties before reading a new Org file
+    # Reset all the tables before reading a new Org file.
+    fileData.clear()
+    tangleProperties.clear()
+    resetTangleHeaderArgsDefault()
     orgFile = file
     styledEcho("Parsing ", styleBright, orgFile, resetStyle, " ..")
     var lnum = 1
