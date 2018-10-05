@@ -359,6 +359,23 @@ proc parsePropertyHeaderArgs(line: string): GlobalHeaderArgs =
     doAssert hdrArgs.len >= 2
     return (lang, hdrArgs[1 .. hdrArgs.high]) # The first element will always be "".
 
+proc parsePropertyDrawerHeaderArgs(line: string): GlobalHeaderArgs =
+  ## Parse ``:header-args:`` in subtree Org property drawers.
+  ##
+  ## Examples:
+  ##
+  ##   * Heading
+  ##   :PROPERTIES:
+  ##   :header-args: :tangle yes :mkdirp yes
+  ##   :END:
+  ##
+  ##   * Heading
+  ##   :PROPERTIES:
+  ##   :header-args:nim: :tangle yes
+  ##   :header-args:nim+: :mkdirp yes
+  ##   :END:
+  return ("", @[])              # todo
+
 proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
@@ -371,9 +388,16 @@ proc lineAction(line: string, lnum: int) =
     lineParts = line.strip.split(":")
     linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
     (propHeaderArgLang, propHeaderArgArgs) = line.parsePropertyHeaderArgs()
+    (propDrawerHeaderArgLang, propDrawerHeaderArgArgs) = if propHeaderArgArgs == @[]:
+                                                           line.parsePropertyDrawerHeaderArgs()
+                                                         else:
+                                                           ("", @[])
   if propHeaderArgArgs != @[]:
     dbg "Property header-args found [Lang={propHeaderArgLang}]: {propHeaderArgArgs}"
     parseTangleHeaderProperties(propHeaderArgArgs, lnum, propHeaderArgLang, false)
+  elif propDrawerHeaderArgArgs != @[]:
+    dbg "Property drawer header-args found [Lang={propDrawerHeaderArgLang}]: {propDrawerHeaderArgArgs}"
+    parseTangleHeaderProperties(propDrawerHeaderArgArgs, lnum, propDrawerHeaderArgLang, false)
   else:
     if firstLineSrcBlock:
       dbg "  first line of src block"
