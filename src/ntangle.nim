@@ -8,14 +8,14 @@ type
 
 const DebugVerbosityLevel = dvLow
 # const DebugVerbosityLevel = dvNone
-template dbg(msg: string, verbosity = dvLow) =
+template dbg(msg: string, verbosity = dvLow, prefix = "[DBG] ") =
   when DebugVerbosityLevel >= dvLow:
     case DebugVerbosityLevel
     of dvHigh:
-      echo "[DBG] " & fmt(msg)
+      echo prefix & fmt(msg)
     of dvLow:
       if verbosity == dvLow:
-        echo "[DBG] " & fmt(msg)
+        echo prefix & fmt(msg)
     else:                     # This case is never reached
       discard
 
@@ -30,7 +30,7 @@ type
     permissions: set[FilePermission]
   GlobalHeaderArgs = tuple
     lang: string
-    args: string
+    args: seq[string]
   LevelLangIndex = tuple
     orgLevel: Natural
     lang: string
@@ -91,8 +91,11 @@ proc parseFilePermissions(octals: string): set[FilePermission] =
 
 proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, onBeginSrc: bool) =
   ## Org header arguments related to tangling. See (org) Extracting Source Code.
+  ## ``hdrArgs`` is a sequence like @["KEY1 VAL1", "KEY2 VAL2", ..].
   let (dir, basename, _) = splitFile(orgFile)
-  dbg "Org file = {orgFile}, dir={dir}, base name={basename}"
+  dbg "Org file = {orgFile}, dir={dir}, base name={basename}", dvHigh
+  dbg("", prefix=" ")           # blank line
+  dbg "Line {lnum} - hdrArgs: {hdrArgs}"
   var
     hArgs: HeaderArgs
     outfile = ""
@@ -277,6 +280,28 @@ proc updateHeaderArgsDefault() =
     discard
   prevOrgLevel = orgLevel
 
+proc parsePropertyHeaderArgs(line: string): GlobalHeaderArgs =
+  ## Parse ``#+property: header-args`` type property Org keywords.
+  ##
+  ## Examples:
+  ##   #+property: header-args:nim :tangle yes
+  ##   #+property: header-args :tangle no
+  let
+    lineParts = line.strip.split(" ")
+    linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
+  if (lineParts.len >= 3 and
+      linePartsLower[0] == "#+property:" and
+      linePartsLower[1].startsWith("header-args")):
+    let
+      headerArgsKwdParts = lineParts[1].strip.split(":")
+      lang = if headerArgsKwdParts.len == 2: # Example: "header-args:nim" -> @["header-args", "nim"]
+               headerArgsKwdParts[1].strip()
+             else:
+               ""
+      hdrArgs = lineParts[2 .. lineParts.high].join(" ").split(":")
+    doAssert hdrArgs.len >= 2
+    return (lang, hdrArgs[1 .. hdrArgs.high]) # The first element will always be "".
+
 proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
@@ -288,19 +313,10 @@ proc lineAction(line: string, lnum: int) =
   let
     lineParts = line.strip.split(":")
     linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
-    orgKeyword = if (lineParts.len >= 3 and
-                     linePartsLower[0].startsWith("#+") and
-                     (not linePartsLower[0].contains(' '))):
-                   linePartsLower[0]
-                 else:
-                   ""
-  if orgKeyword != "":
-    dbg "Keyword found on line {lnum}:"
-    for i, p in lineParts:
-      dbg "  part {i} = {p}"
-    if ((orgKeyword == "#+property") and
-        (linePartsLower[1].strip() == "header-args")):
-      parseTangleHeaderProperties(lineParts[2 .. lineParts.high], lnum, "", false)
+    (propHeaderArgLang, propHeaderArgArgs) = line.parsePropertyHeaderArgs()
+  if propHeaderArgArgs != @[]:
+    dbg "Property header-args found [Lang={propHeaderArgLang}]: {propHeaderArgArgs}"
+    parseTangleHeaderProperties(propHeaderArgArgs, lnum, propHeaderArgLang, false)
   else:
     if firstLineSrcBlock:
       dbg "  first line of src block"
