@@ -1,0 +1,3 @@
+#+begin_src nim :tangle hello.nim :flags -d:release
+echo "hello"
+#+end_src
