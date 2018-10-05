@@ -1,4 +1,4 @@
-#+property: tangle lib.rs
+#+property: header-args :tangle org-tangle-engine/lib.rs :mkdirp yes
 #+title: org-tangle-engine
 
 * use

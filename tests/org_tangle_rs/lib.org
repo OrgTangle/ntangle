@@ -1,4 +1,4 @@
-#+property: tangle lib.rs
+#+property: header-args :tangle org-parser/lib.rs :mkdirp yes
 #+title: org-parser
 
 * [todo-stack]
