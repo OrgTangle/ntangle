@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.4.1"
+version       = "0.4.2"
 author        = "Kaushal Modi"
 description   = "Basic tangling of Org documents using Nim"
 license       = "MIT"
