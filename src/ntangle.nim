@@ -318,7 +318,7 @@ proc parsePropertyHeaderArgs(line: string): GlobalHeaderArgs =
                headerArgsKwdParts[1].strip()
              else:
                ""
-      hdrArgs = lineParts[2 .. lineParts.high].join(" ").split(":")
+      hdrArgs = lineParts[2 .. lineParts.high].join(" ").split(":").mapIt(it.strip())
     doAssert hdrArgs.len >= 2
     return (lang, hdrArgs[1 .. hdrArgs.high]) # The first element will always be "".
 
