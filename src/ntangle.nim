@@ -34,6 +34,11 @@ const
 dbg "{tangledExt}"
 
 type
+  HeaderArgType = enum
+    haPropertyKwd
+    haPropertyDrawer
+    haBeginSrc
+    haNone
   UserError = object of Exception
   OrgError = object of Exception
   HeaderArgs = object
@@ -42,7 +47,8 @@ type
     shebang: string
     mkdirp: bool
     permissions: set[FilePermission]
-  GlobalHeaderArgs = tuple
+  LangAndArgs = tuple
+    argType: HeaderArgType
     lang: string
     args: seq[string]
   LevelLangIndex = tuple
@@ -143,11 +149,8 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   for hdrArg in hdrArgs:
     let
       hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
-    if hdrArgParts.len != 2:
-      raise newException(OrgError, fmt("Line {lnum} - The header arg ':{hdrArgParts[0]}' is missing its value."))
-    let
       arg = hdrArgParts[0]
-      argval = hdrArgParts[1].strip(chars={'"'}) #treat :tangle foo.ext and :tangle "foo.ext" the same
+      argval = hdrArgParts[1]
     dbg "arg={arg}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
     case arg
     of "tangle":
@@ -250,7 +253,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     dbg "** outFileName now set to {outFileName}"
     fileHeaderArgs[outFileName] = hArgs
 
-  dbg "line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile} | outFileName={outFileName}"
+  dbg "line={lnum}, onBeginSrc={onBeginSrc}, hArgs.tangle={hArgs.tangle} outfile={outfile} | outFileName={outFileName}"
   if onBeginSrc and (hArgs.tangle != "no"):
     doAssert outFileName != ""
     dbg "line {lnum}: buffering enabled for `{outFileName}'"
@@ -337,27 +340,69 @@ proc updateHeaderArgsDefault() =
     discard
   prevOrgLevel = orgLevel
 
-proc parsePropertyHeaderArgs(line: string): GlobalHeaderArgs =
-  ## Parse ``#+property: header-args`` type property Org keywords.
+proc getHeaderArgs(s: string): LangAndArgs =
+  ## Get well-formatted header args.
   ##
   ## Examples:
-  ##   #+property: header-args:nim :tangle yes
-  ##   #+property: header-args :tangle no
+  ##
+  ##   "  #+BEGIN_SRC nim :tangle \"hello.nim\" :flags -d:release  "
+  ##   "#+property: header-args:nim :tangle hello.nim :flags -d:release"
+  ##   "#+property: HEADER-ARGS :tangle hello.nim :flags -d:release"
+  ##   "  :header-args: :tangle hello.nim :flags -d:release"
+  ##
+  ## All of the above inputs will result in the below string sequence
+  ## for the ``args`` field of ``LandAndArgs``:
+  ##   -> @["tangle hello.nim", "flags -d:release"]
+  ## The ``lang`` field will be an empty string or a language string
+  ## like ``"nim"``.
   let
-    lineParts = line.strip.split(" ")
-    linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
-  if (lineParts.len >= 3 and
-      linePartsLower[0] == "#+property:" and
-      linePartsLower[1].startsWith("header-args")):
+    spaceSepParts = s.strip.split(" ")
+  var
+    haType: HeaderArgType = haNone
+    headerArgsRaw: seq[string] = @[]
+    headerArgs: seq[string] = @[]
+    headerArgPair: string
+    lang: string
+  dbg "spaceSepParts: {spaceSepParts}"
+  if spaceSepParts.len >= 3 and
+     spaceSepParts[0].toLowerAscii() == "#+property:":
+    headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     let
-      headerArgsKwdParts = lineParts[1].strip.split(":")
-      lang = if headerArgsKwdParts.len == 2: # Example: "header-args:nim" -> @["header-args", "nim"]
-               headerArgsKwdParts[1].strip()
-             else:
-               ""
-      hdrArgs = lineParts[2 .. lineParts.high].join(" ").split(":").mapIt(it.strip())
-    doAssert hdrArgs.len >= 2
-    return (lang, hdrArgs[1 .. hdrArgs.high]) # The first element will always be "".
+      kwdParts = spaceSepParts[1].split(":")
+    if kwdParts.len == 2:
+      lang = kwdParts[1].strip()
+    haType = haPropertyKwd
+  # ":header-args:", ":header-args+:", ":header-args:nim:"
+  elif spaceSepParts.len >= 3 and
+       spaceSepParts[0].toLowerAscii().startsWith(":header-args"):
+    headerArgsRaw = spaceSepParts[1 .. spaceSepParts.high]
+    let
+      kwdParts = spaceSepParts[0].split(":")
+    if kwdParts.len == 4:
+      lang = kwdParts[2].strip(chars = {' ', '+'})
+    haType = haPropertyDrawer
+  elif spaceSepParts.len >= 2 and
+       spaceSepParts[0].toLowerAscii() == "#+begin_src":
+    if spaceSepParts.len >= 3:
+      headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
+    lang = spaceSepParts[1].strip()
+    haType = haBeginSrc
+  if haType != haNone:
+    #echo headerArgsRaw
+    for i, h in headerArgsRaw:
+      if h.len >= 2 and h[0] == ':':
+        if i == headerArgsRaw.high:
+          raise newException(OrgError, fmt("The header args are ending with a ':key' which is not valid. Found {headerArgsRaw}"))
+        if headerArgPair != "":
+          headerArgs.add(headerArgPair)
+        headerArgPair = h[1 .. h.high]
+        #echo fmt"{i} - {headerArgPair}"
+      else:
+        headerArgPair = headerArgPair & " " & h.strip(chars = {'"'})
+        #echo fmt"{i} - {headerArgPair}"
+        if i == headerArgsRaw.high:
+          headerArgs.add(headerArgPair)
+  return (haType, lang, headerArgs)
 
 proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
@@ -368,15 +413,19 @@ proc lineAction(line: string, lnum: int) =
     dbg "orgLevel = {orgLevel}"
     updateHeaderArgsDefault()
   let
-    lineParts = line.strip.split(":")
-    linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
-    (propHeaderArgLang, propHeaderArgArgs) = line.parsePropertyHeaderArgs()
-  if propHeaderArgArgs != @[]:
-    dbg "Property header-args found [Lang={propHeaderArgLang}]: {propHeaderArgArgs}"
-    parseTangleHeaderProperties(propHeaderArgArgs, lnum, propHeaderArgLang, false)
+    (haType, haLang, haArgs) = line.getHeaderArgs()
+  dbg "[line {lnum}] {line}"
+  dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
+  if haType in {haPropertyKwd}:
+    dbg "Property header-args found [Lang={haLang}]: {haArgs}"
+    parseTangleHeaderProperties(haArgs, lnum, haLang, false)
   else:
+    let
+      lineParts = line.strip.split(":")
+      linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
     if firstLineSrcBlock:
       dbg "  first line of src block"
+    dbg "line {lnum}: bufEnabled: {bufEnabled} linePartsLower: {linePartsLower}"
     if bufEnabled:
       if (linePartsLower[0] == "#+end_src"):
         bufEnabled = false
@@ -390,6 +439,7 @@ proc lineAction(line: string, lnum: int) =
           blockIndent = (line.len - line.strip(trailing=false).len)
 
         try:
+          doAssert outFileName != ""
           if firstLineSrcBlock and fileHeaderArgs[outFileName].padline:
             fileData[outFileName].add("\n")
           fileData[outFileName].add(lineAdjust(line, blockIndent))
@@ -397,13 +447,8 @@ proc lineAction(line: string, lnum: int) =
           fileData[outFileName] = lineAdjust(line, blockIndent)
         dbg "  extra indentation: {blockIndent}"
         firstLineSrcBlock = false
-    else:
-      let
-        firstPartParts = linePartsLower[0].split(" ")
-      if (firstPartParts[0] == "#+begin_src") and (firstPartParts.len >= 2): #Line needs to begin with "#+begin_src LANG"
-        let
-          lang = firstPartParts[1]
-        parseTangleHeaderProperties(lineParts[1 .. lineParts.high], lnum, lang, true)
+    elif haType == haBeginSrc:
+      parseTangleHeaderProperties(haArgs, lnum, haLang, true)
 
 proc writeFiles() =
   ## Write the files from ``fileData``.
@@ -471,7 +516,8 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
       else:
         raise newException(UserError, fmt("{f1} is neither a valid file nor a directory"))
   except:
-    stderr.styledWriteLine(fgRed, "  [ERROR] ", fgDefault, getCurrentExceptionMsg() & "\n")
+    stderr.styledWriteLine(fgRed, fmt"  [ERROR] {getCurrentException().name}: ",
+                           fgDefault, getCurrentExceptionMsg() & "\n")
     quit 1
 
 when isMainModule:
