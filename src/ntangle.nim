@@ -19,6 +19,15 @@ template dbg(msg: string, verbosity = dvLow, prefix = "[DBG] ") =
     else:                     # This case is never reached
       discard
 
+const
+  tangledExt = {
+    "emacs-lisp" : "el",
+    "shell" : "sh",
+    "bash" : "sh",
+    "tcsh" : "csh"
+  }.toTable
+dbg "{tangledExt}"
+
 type
   UserError = object of Exception
   OrgError = object of Exception
@@ -100,7 +109,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     hArgs: HeaderArgs
     outfile = ""
   if lang != "":
-    outfile = dir / basename & "." & lang # For now, set the extension = lang, works for nim, org, but not everything
+    let
+      langLower = lang.toLowerAscii()
+      ext = if tangledExt.hasKey(langLower):
+              tangledExt[langLower]
+            else:
+              lang
+    outfile = dir / basename & "." & ext
 
   if fileHeaderArgs.hasKey(outfile):
     hArgs = fileHeaderArgs[outfile]

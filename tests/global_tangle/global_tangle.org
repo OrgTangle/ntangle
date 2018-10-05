@@ -1,5 +1,7 @@
 #+property: header-args :tangle yes
 
+At Org level 0.
+
 #+begin_src nim
 echo "this will be tangled to global_tangle.nim"
 #+end_src
@@ -7,11 +9,18 @@ echo "this will be tangled to global_tangle.nim"
 #+begin_src nim :tangle no
 echo "this block won't get tangled"
 #+end_src
-
+* Heading 1
+Now at Org level 1.
 #+begin_src nim :tangle yes
 echo "this will be tangled and appended to the first block tangled above"
 #+end_src
-
+** Heading 1.1
+Now at Org level 2.
 #+begin_src nim :tangle specified_file.nim
 echo "this will be tangled to specified_file.nim"
+#+end_src
+* Heading 2
+Back at Org level 1.
+#+begin_src emacs-lisp
+(message "this will be tangled to global_tangle.el")
 #+end_src
