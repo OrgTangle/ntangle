@@ -1,16 +1,40 @@
 #+title: NTangle
 
-Basic tangling of Org documents using Nim.
+/Command-line utility for Tangling of Org documents — programmed in
+Nim./
 
-- Note :: ~ntangle~ works well for the lightly tested files in the
-          ~test/~ dir of this repo. See the [[#limitations][Limitations]] section below.
+* What is Tangling
+From [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]]:
 
-See the [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]] section for *real Org
-tangling*.
+#+begin_quote
+Extracting source code from code blocks is a basic task in /literate
+programming/. Org has features to make this easy. In literate
+programming parlance, documents on creation are /woven/ with code and
+documentation, and on export, the code is *tangled* for execution by a
+computer.
 
-*You do not need Emacs or Org mode installed to use this tool.*
+Org facilitates weaving and tangling for producing, maintaining,
+sharing, and exporting literate programming documents. Org provides
+extensive customization options for extracting source code.
 
-* Download binary
+When Org tangles ~src~ code blocks, it expands, merges, and transforms
+them. Then Org recomposes them into one or more separate files, as
+configured through the options. During this /tangling/ process, Org
+expands variables in the source code, and resolves any Noweb style
+references (see [[https://orgmode.org/manual/Noweb-reference-syntax.html][Noweb reference syntax]]).
+#+end_quote
+
+/You can visit the same Org manual section from within Emacs by going
+to this Info manual node: ~(org) Extracting Source Code~./
+* Why ~ntangle~?
+While the tangling of Org documents works great from within Emacs, it
+can be quite a bit slow for large Org documents. This project aims to
+provide /almost/ the same tangling functionality at a much higher
+speed.
+
+You do *not* need Emacs or Org mode installed to use ~ntangle~.
+* Installation
+** Download binary
 - 64-bit GNU/Linux type OS :: Head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this
      repo to download the release archive
      ~ntangle-VERSION.Linux_64bit_musl.tar.xz~. Then simply extract it
@@ -18,6 +42,33 @@ tangling*.
 - Other OSes :: The statically linked binary is available only for
                 64-bit GNU/Linux type OS. Follow the [[#development][Development]]
                 section below to build the binary locally for your OS.
+** Build locally
+See [[#development][Development]].
+* Features [7/9]
+- [X] Tangle global header-args in ~#+property~ keywords
+- [X] Tangle header-args directly above Org source blocks
+- [X] Understand the precendence order of the tangle header-args when
+  a mix of global and source block header-args are used
+- [X] Language-specific header-args (e.g. ~#+property: header-args:nim
+  :tangle yes~)
+- [X] Concatenating multiple source blocks to the same tangled file
+- [X] Respects comma-escaping in source blocks
+- [X] Removes common indentation, but also retains the indentation
+  where needed
+- [ ] Tangle subtree property drawer header-args
+- [ ] Noweb support. I sorely miss the lack of ~noweb~ support.. I use
+  it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
+  - [ ] ~:noweb~
+  - [ ] ~:noweb-ref~
+  - [ ] ~:noweb-sep~
+** Supported ~header-args~ switches [5/7]
+- [X] ~:tangle~
+- [X] ~:padline~
+- [X] ~:shebang~
+- [X] ~:mkdirp~
+- [X] ~:tangle-mode~
+- [ ] ~:comments~
+- [ ] ~:no-expand~
 * Usage
 Add one or more Org files (files with names ending in ".org") or
 directory names after the ~ntangle~ command. If directory names are
@@ -47,6 +98,9 @@ ntangle <FILE1.org> <DIR1> <FILE2.org> <DIR2> ..
 
 The tangled files will be created in paths relative to the source Org
 file.
+* Org mode file samples for tangling
+You can find samples of the supported Org mode tangling in the [[https://github.com/OrgTangle/ntangle/tree/master/tests][*test*
+directory]] of this project.
 * Development
 ** Building
 [[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
@@ -77,6 +131,7 @@ You need to add *~/.nimble/bin/* to your ~PATH~ environment variable.
 
 #+begin_example
 Parsing tests/test1/test1.ORG ..
+  [WARN] Line 4 - ':eval' header argument is not supported at the moment.
   Writing tests/test1/test_passing.nim (8 lines) ..
   Writing tests/test1/test_failing.nim (8 lines) ..
 
@@ -87,7 +142,7 @@ Parsing tests/tangle_no_yes/tangle_no_yes.org ..
 Entering directory tests/src_blocks_with_extra_indentation/ ..
 Parsing tests/src_blocks_with_extra_indentation/src_blocks_with_extra_indentation.org ..
   Writing tests/src_blocks_with_extra_indentation/hi2.nim (3 lines) ..
-  Writing tests/src_blocks_with_extra_indentation/hello2.nim (3 lines) ..
+  Writing tests/src_blocks_with_extra_indentation/hello2.nim (5 lines) ..
 
 Entering directory tests/multiple_src_blocks_tangled_to_same_file/ ..
 Parsing tests/multiple_src_blocks_tangled_to_same_file/multiple_src_blocks_tangled_to_same_file.org ..
@@ -105,6 +160,33 @@ Parsing tests/wyag/write-yourself-a-git.org ..
 Parsing tests/shebang/shebang.org ..
   Writing tests/shebang/echo.sh (3 lines) ..
 
+Entering directory tests/global_tangle/ ..
+Parsing tests/global_tangle/global_tangle.org ..
+  Writing tests/global_tangle/global_tangle.el (2 lines) ..
+  Writing tests/global_tangle/specified_file.nim (2 lines) ..
+  Writing tests/global_tangle/global_tangle.nim (4 lines) ..
+
+Parsing tests/global_tangle/global_tangle_lang_specific.org ..
+  Writing tests/global_tangle/global_tangle_lang_specific.nim (2 lines) ..
+
+Entering directory tests/org_tangle_rs/ ..
+Parsing tests/org_tangle_rs/lib.org ..
+  Writing tests/org_tangle_rs/org-parser/lib.rs (64 lines) ..
+
+Parsing tests/org_tangle_rs/engine.org ..
+  Writing tests/org_tangle_rs/org-tangle-engine/lib.rs (209 lines) ..
+
+Parsing tests/org_tangle_rs/engine_mini.org ..
+  Writing tests/org_tangle_rs/org-tangle-engine/lib_mini.rs (9 lines) ..
+
+Entering directory tests/nested_src/ ..
+Parsing tests/nested_src/nested_src.org ..
+  Writing tests/nested_src/tangled.org (9 lines) ..
+  Writing tests/nested_src/nested_src.nim (14 lines) ..
+
+Parsing tests/nested_src/tangled.org ..
+  No tangle blocks found
+
 Parsing tests/missing_arg_value/missing_arg_value.org ..
   [ERROR] Line 1 - The header arg ':tangle' is missing its value.
 
@@ -119,15 +201,6 @@ Parsing tangle_mode.org ..
   Writing file_permissions_600_override_shebang (3 lines) ..
   Writing file_permissions_644 (2 lines) ..
 #+end_example
-* Limitations
-I wouldn't be surprised if there are many more limitations than the
-few listed below:
-- Does not support Org heading specific header properties.
-- Does not support file specific header properties.
-- Does not support ~noweb~. I sorely miss the lack of ~noweb~
-  support.. I use it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
-- A lot of other tangle options.. Visit ~(org) Extracting Source Code~
-  Info manual node.
 * History
 The ~ntangle.nim~ file was written as an exercise to roughly translate the
 Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
