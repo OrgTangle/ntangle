@@ -69,6 +69,8 @@ See [[#development][Development]].
 - [X] ~:tangle-mode~
 - [ ] ~:comments~
 - [ ] ~:no-expand~
+* Screenshot
+[[https://raw.githubusercontent.com/OrgTangle/ntangle/master/doc/img/Screenshot_ntangle_v0.4.2.png][https://raw.githubusercontent.com/OrgTangle/ntangle/master/doc/img/Screenshot_ntangle_v0.4.2.png]]
 * Usage
 Add one or more Org files (files with names ending in ".org") or
 directory names after the ~ntangle~ command. If directory names are
@@ -126,81 +128,6 @@ You need to add *~/.nimble/bin/* to your ~PATH~ environment variable.
 # cd to the git repo dir
 ./tests/test.sh
 #+end_src
-
-# #+RESULTS:
-
-#+begin_example
-Parsing tests/test1/test1.ORG ..
-  [WARN] Line 4 - ':eval' header argument is not supported at the moment.
-  Writing tests/test1/test_passing.nim (8 lines) ..
-  Writing tests/test1/test_failing.nim (8 lines) ..
-
-Parsing tests/tangle_no_yes/tangle_no_yes.org ..
-  Writing tests/tangle_no_yes/tangle_no_yes.nim (2 lines) ..
-  Writing tests/tangle_no_yes/specified_file.nim (2 lines) ..
-
-Entering directory tests/src_blocks_with_extra_indentation/ ..
-Parsing tests/src_blocks_with_extra_indentation/src_blocks_with_extra_indentation.org ..
-  Writing tests/src_blocks_with_extra_indentation/hi2.nim (3 lines) ..
-  Writing tests/src_blocks_with_extra_indentation/hello2.nim (5 lines) ..
-
-Entering directory tests/multiple_src_blocks_tangled_to_same_file/ ..
-Parsing tests/multiple_src_blocks_tangled_to_same_file/multiple_src_blocks_tangled_to_same_file.org ..
-  Writing tests/multiple_src_blocks_tangled_to_same_file/hi.nim (3 lines) ..
-  Writing tests/multiple_src_blocks_tangled_to_same_file/hello.nim (3 lines) ..
-
-Parsing tests/wyag/write-yourself-a-git.org ..
-  [WARN] Line 200 - ':noweb' header argument is not supported at the moment.
-  [WARN] Line 226 - ':noweb' header argument is not supported at the moment.
-  [WARN] Line 339 - ':noweb' header argument is not supported at the moment.
-  Writing tests/wyag/wyag (5 lines) ..
-  Writing tests/wyag/wyag-tests (104 lines) ..
-  Writing tests/wyag/libwyag.py (683 lines) ..
-
-Parsing tests/shebang/shebang.org ..
-  Writing tests/shebang/echo.sh (3 lines) ..
-
-Entering directory tests/global_tangle/ ..
-Parsing tests/global_tangle/global_tangle.org ..
-  Writing tests/global_tangle/global_tangle.el (2 lines) ..
-  Writing tests/global_tangle/specified_file.nim (2 lines) ..
-  Writing tests/global_tangle/global_tangle.nim (4 lines) ..
-
-Parsing tests/global_tangle/global_tangle_lang_specific.org ..
-  Writing tests/global_tangle/global_tangle_lang_specific.nim (2 lines) ..
-
-Entering directory tests/org_tangle_rs/ ..
-Parsing tests/org_tangle_rs/lib.org ..
-  Writing tests/org_tangle_rs/org-parser/lib.rs (64 lines) ..
-
-Parsing tests/org_tangle_rs/engine.org ..
-  Writing tests/org_tangle_rs/org-tangle-engine/lib.rs (209 lines) ..
-
-Parsing tests/org_tangle_rs/engine_mini.org ..
-  Writing tests/org_tangle_rs/org-tangle-engine/lib_mini.rs (9 lines) ..
-
-Entering directory tests/nested_src/ ..
-Parsing tests/nested_src/nested_src.org ..
-  Writing tests/nested_src/tangled.org (9 lines) ..
-  Writing tests/nested_src/nested_src.nim (14 lines) ..
-
-Parsing tests/nested_src/tangled.org ..
-  No tangle blocks found
-
-Parsing tests/missing_arg_value/missing_arg_value.org ..
-  [ERROR] Line 1 - The header arg ':tangle' is missing its value.
-
-Parsing tests/mkdirp_no/mkdirp_no.org ..
-  [ERROR] Unable to write to `tests/mkdirp_no/./foo/bar/mkdirp_test.sh'. `tests/mkdirp_no/./foo/bar/' directory does not exist.
-
-Parsing tests/mkdirp_yes/mkdirp_yes.org ..
-  Writing tests/mkdirp_yes/./foo/bar/mkdirp_test.sh (2 lines) ..
-
-Parsing tangle_mode.org ..
-  Writing file_permissions_755 (2 lines) ..
-  Writing file_permissions_600_override_shebang (3 lines) ..
-  Writing file_permissions_644 (2 lines) ..
-#+end_example
 * History
 The ~ntangle.nim~ file was written as an exercise to roughly translate the
 Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
