@@ -24,7 +24,8 @@ const
     "emacs-lisp" : "el",
     "shell" : "sh",
     "bash" : "sh",
-    "tcsh" : "csh"
+    "tcsh" : "csh",
+    "rust" : "rs"
   }.toTable
 dbg "{tangledExt}"
 

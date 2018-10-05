@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-10-05 12:30:39 kmodi>
+# Time-stamp: <2018-10-05 12:51:10 kmodi>
 
 set -euo pipefail # http://redsymbol.net/articles/unofficial-bash-strict-mode
 IFS=$'\n\t'
@@ -13,6 +13,7 @@ run_test () {
     "${bin}" tests/wyag/write-yourself-a-git.org
     "${bin}" tests/shebang/shebang.org
     "${bin}" tests/global_tangle/
+    "${bin}" tests/org_tangle_rs/
 
     "${bin}" tests/missing_arg_value/missing_arg_value.org || true
 
