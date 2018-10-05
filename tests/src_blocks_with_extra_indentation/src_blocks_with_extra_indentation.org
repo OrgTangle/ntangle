@@ -14,4 +14,6 @@ Code blocks have extra indentation of 2 spaces.
 
 #+begin_src nim :tangle hello2.nim :padline no
   echo "hello 2"
+  let
+    foo = "bar"
 #+end_src
