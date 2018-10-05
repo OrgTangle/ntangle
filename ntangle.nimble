@@ -2,7 +2,7 @@
 
 version       = "0.4.2"
 author        = "Kaushal Modi"
-description   = "Basic tangling of Org documents using Nim"
+description   = "Command-line utility for Tangling of Org mode documents"
 license       = "MIT"
 srcDir        = "src"
 skipFiles     = @["ntangle_nodbg.nim"]
