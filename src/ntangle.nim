@@ -32,7 +32,7 @@ type
     lang: string
     args: string
   LevelLangIndex = tuple
-    orgLevel: int
+    orgLevel: Natural
     lang: string
   TangleHeaderArgs = Table[LevelLangIndex, HeaderArgs] # orgLevel, lang, header args
 
@@ -42,7 +42,7 @@ var
   orgFile: string
   orgLevel: Natural
   fileData = initTable[string, string]() # file, data
-  tangleHeaderArgsDefault = initTangleHeaderArgs()
+  tangleHeaderArgsDefaults = initTangleHeaderArgs()
   outFileName: string
   tangleProperties = initTable[string, HeaderArgs]() # file, header args
   bufEnabled: bool
@@ -50,13 +50,13 @@ var
   blockIndent = 0
 
 proc resetTangleHeaderArgsDefault() =
-  tangleHeaderArgsDefault.clear()
+  tangleHeaderArgsDefaults.clear()
   # Default tangle header args for all Org levels and languages.
-  tangleHeaderArgsDefault[(0, "")] = HeaderArgs(tangle : "no",
-                                                padline : true,
-                                                shebang : "",
-                                                mkdirp : false,
-                                                permissions : {})
+  tangleHeaderArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
+                                                         padline : true,
+                                                         shebang : "",
+                                                         mkdirp : false,
+                                                         permissions : {})
 
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
@@ -90,7 +90,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   try:
     prop = tangleProperties[outFileName]
   except KeyError: #If tangleProperties does not already exist for the current output file
-    prop = tangleHeaderArgsDefault[(0, "")]
+    prop = tangleHeaderArgsDefaults[(0.Natural, "")]
 
   for hdrArg in hdrArgs:
     let
@@ -192,7 +192,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
 
     dbg "xx line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
     if (not onBeginSrc):      # global or subtree property
-      tangleHeaderArgsDefault[(orgLevel, lang)] = prop
+      tangleHeaderArgsDefaults[(orgLevel, lang)] = prop
 
   if outfile != "":
     outFileName = outfile
