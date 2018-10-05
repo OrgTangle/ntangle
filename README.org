@@ -44,9 +44,11 @@ You do *not* need Emacs or Org mode installed to use ~ntangle~.
                 section below to build the binary locally for your OS.
 ** Build locally
 See [[#development][Development]].
-* Features [7/9]
-- [X] Tangle global header-args in ~#+property~ keywords
-- [X] Tangle header-args directly above Org source blocks
+* Features
+** Tangling /minus Noweb/ [7/8]
+- [X] Understand global tangle header-args in ~#+property~ keywords
+- [X] Understand tangle header-args directly above Org source blocks
+- [ ] Understand tangle subtree property drawer header-args
 - [X] Understand the precendence order of the tangle header-args when
   a mix of global and source block header-args are used
 - [X] Language-specific header-args (e.g. ~#+property: header-args:nim
@@ -55,13 +57,7 @@ See [[#development][Development]].
 - [X] Respects comma-escaping in source blocks
 - [X] Removes common indentation, but also retains the indentation
   where needed
-- [ ] Tangle subtree property drawer header-args
-- [ ] Noweb support. I sorely miss the lack of ~noweb~ support.. I use
-  it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
-  - [ ] ~:noweb~
-  - [ ] ~:noweb-ref~
-  - [ ] ~:noweb-sep~
-** Supported ~header-args~ switches [5/7]
+*** Supported ~header-args~ switches [5/7]
 - [X] ~:tangle~
 - [X] ~:padline~
 - [X] ~:shebang~
@@ -69,6 +65,17 @@ See [[#development][Development]].
 - [X] ~:tangle-mode~
 - [ ] ~:comments~
 - [ ] ~:no-expand~
+** Noweb [0/1]
+- [ ] Noweb support. I sorely miss the lack of ~noweb~ support.. I use
+  it heavily in [[https://github.com/kaushalmodi/eless][~eless~]].
+
+/There is *no* plan to support Org Babel functions with Noweb, like
+evaluating code blocks during tangling, etc. (just use Emacs for those
+:D)./
+*** Supported ~header-args~ switches for Noweb [0/3]
+- [ ] ~:noweb~
+- [ ] ~:noweb-ref~
+- [ ] ~:noweb-sep~
 * Screenshot
 [[https://raw.githubusercontent.com/OrgTangle/ntangle/master/doc/img/Screenshot_ntangle_v0.4.2.png][https://raw.githubusercontent.com/OrgTangle/ntangle/master/doc/img/Screenshot_ntangle_v0.4.2.png]]
 * Usage
