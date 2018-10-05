@@ -95,19 +95,22 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   let (dir, basename, _) = splitFile(orgFile)
   dbg "Org file = {orgFile}, dir={dir}, base name={basename}", dvHigh
   dbg("", prefix=" ")           # blank line
-  dbg "Line {lnum} - hdrArgs: {hdrArgs}"
+  dbg "Line {lnum}, Lang {lang} - hdrArgs: {hdrArgs}"
   var
     hArgs: HeaderArgs
     outfile = ""
   if lang != "":
-    outfile = dir / basename & "." & lang #For now, set the extension = lang, works for nim, org, but not everything
+    outfile = dir / basename & "." & lang # For now, set the extension = lang, works for nim, org, but not everything
 
-  if fileHeaderArgs.hasKey(outFileName):
-    hArgs = fileHeaderArgs[outFileName]
+  if fileHeaderArgs.hasKey(outfile):
+    hArgs = fileHeaderArgs[outfile]
+    dbg "Line {lnum} - Using fileHeaderArgs[{outfile}], now hArgs = {hArgs}"
   elif headerArgsDefaults.hasKey((orgLevel, lang)):
     hArgs = headerArgsDefaults[(orgLevel, lang)]
+    dbg "Line {lnum} - Using Org level {orgLevel} + lang {lang} scope, now hArgs = {hArgs}"
   else:
     hArgs = headerArgsDefaults[(orgLevel, "")]
+    dbg "Line {lnum} - Using only Org level {orgLevel} scope, now hArgs = {hArgs}"
 
   for hdrArg in hdrArgs:
     let
@@ -211,6 +214,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     if (not onBeginSrc):      # global or subtree property
       headerArgsDefaults[(orgLevel, lang)] = hArgs
 
+  dbg "[after] Line {lnum} - hArgs = {hArgs}"
   # Save the updated hArgs to the file-specific HeaderArgs global
   # value.
   if outfile != "":
