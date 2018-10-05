@@ -257,8 +257,31 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     bufEnabled = true
     firstLineSrcBlock = true
 
+proc orgRemoveEscapeCommas(line: string): string =
+  ## Remove only single leading comma if it's followed by "#+" or "*".
+  ## The leading comma can have preceeding spaces too, but it still
+  ## should be removed.
+  ##
+  ## Examples:
+  ##   ",#+foo"   ->  "#+foo"
+  ##   "  ,#+foo" ->  "  #+foo"
+  ##   ",* foo"   ->  "* foo"
+  ##   ",,* foo"  ->  ",* foo"
+  ##   ",abc"     ->  ",abc"      This comma remains
+  ##   ",# abc"   ->  ",# abc"    This comma remains too
+  let
+    lineParts = line.split(",", maxSplit = 1)
+  if (lineParts.len == 2) and
+     (lineParts[1].startsWith("#+") or
+       lineParts[1].startsWith("*") or
+       lineParts[1].startsWith(",")):
+      return lineParts[0] & lineParts[1]
+  else:
+    return line
+
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
+  dbg "[lineAdjust] line={line}"
   result =
     if indent == 0:
       line & "\n"
@@ -275,6 +298,7 @@ proc lineAdjust(line: string, indent: int): string =
         line[indent .. line.high] & "\n"
       else:
         line & "\n"
+  result = result.orgRemoveEscapeCommas()
 
 proc getOrgLevel(line: string): Natural =
   ## Return the current Org level if ``line`` is an Org heading.
