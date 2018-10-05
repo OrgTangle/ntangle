@@ -1,0 +1,112 @@
+#+property: tangle lib.rs
+#+title: org-parser
+
+* [todo-stack]
+
+  - learn basic parsing-techniques
+  - learn combine
+    https://github.com/Marwes/combine
+
+* attribute
+
+  #+begin_src rust
+  #![feature(uniform_paths)]
+  #![allow(unused_parens)]
+  #![allow(dead_code)]
+  #![allow(unused_macros)]
+  #+end_src
+
+* use
+
+  #+begin_src rust
+  use std::path::Path;
+  use std::path::PathBuf;
+  // use std::sync::Arc;
+  // use std::collections::HashMap;
+  #+end_src
+
+* datatype
+
+  #+begin_src rust
+  pub type Line = String;
+  pub type LineVec = Vec <Line>;
+  pub type ElementVec = Vec <Element>;
+  pub type PropertyVec = Vec <Property>;
+  #+end_src
+
+* Element
+
+  #+begin_src rust
+  pub enum Element {
+      N (Node),
+      B (Block),
+      T (Text),
+      L (List),
+  }
+  #+end_src
+
+* Root
+
+  #+begin_src rust
+  pub struct Root {
+      path: Option <PathBuf>,
+      property_vec: PropertyVec,
+      body: ElementVec,
+  }
+  #+end_src
+
+* Node
+
+  #+begin_src rust
+  pub struct Node {
+      headline: Line,
+      property_vec: PropertyVec,
+      body: ElementVec,
+  }
+  #+end_src
+
+* List
+
+  #+begin_src rust
+  pub struct List {
+      list_type: ListType,
+      content: Vec <(Text, Option <List>)>,
+  }
+
+  pub enum ListType {
+      DashMark,
+      PlusMark,
+      Numbered,
+  }
+  #+end_src
+
+* Text
+
+  #+begin_src rust
+  pub struct Text {
+     line_vec: LineVec,
+  }
+  #+end_src
+
+* Block
+
+  #+begin_src rust
+  pub struct Block {
+     block_type: BlockType,
+     property_vec: PropertyVec,
+     line_vec: LineVec,
+  }
+
+  pub enum BlockType {
+      CodeBlock,
+  }
+  #+end_src
+
+* Property
+
+  #+begin_src rust
+  pub struct Property {
+      name: String,
+      value: String,
+  }
+  #+end_src
