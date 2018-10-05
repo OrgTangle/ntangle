@@ -40,7 +40,8 @@ func initTangleHeaderArgs(): TangleHeaderArgs = initTable[LevelLangIndex, Header
 
 var
   orgFile: string
-  orgLevel: Natural
+  prevOrgLevel = -1
+  orgLevel = 0.Natural
   fileData = initTable[string, string]() # file, data
   headerArgsDefaults = initTangleHeaderArgs()
   outFileName: string
@@ -49,7 +50,18 @@ var
   firstLineSrcBlock = false
   blockIndent = 0
 
-proc resetTangleHeaderArgsDefault() =
+proc resetStateVars() =
+  ## Reset all the state variables.
+  ## This is called before reading each new Org file.
+  orgFile = ""
+  prevOrgLevel = -1
+  orgLevel = 0.Natural
+  outFileName = ""
+  firstLineSrcBlock = false
+  blockIndent = 0
+
+  fileData.clear()
+  fileHeaderArgs.clear()
   headerArgsDefaults.clear()
   # Default tangle header args for all Org levels and languages.
   headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
@@ -87,10 +99,12 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   if lang != "":
     outfile = dir / basename & "." & lang #For now, set the extension = lang, works for nim, org, but not everything
 
-  try:
+  if fileHeaderArgs.hasKey(outFileName):
     hArgs = fileHeaderArgs[outFileName]
-  except KeyError: #If fileHeaderArgs does not already exist for the current output file
-    hArgs = headerArgsDefaults[(0.Natural, "")]
+  elif headerArgsDefaults.hasKey((orgLevel, lang)):
+    hArgs = headerArgsDefaults[(orgLevel, lang)]
+  else:
+    hArgs = headerArgsDefaults[(orgLevel, "")]
 
   for hdrArg in hdrArgs:
     let
@@ -240,6 +254,29 @@ proc getOrgLevel(line: string): Natural =
      line[0 .. lastStarLocation].allCharsInSet({'*'}):
     return lastStarLocation + 1
 
+proc updateHeaderArgsDefault() =
+  ## Update the default header args for the current orgLevel scope.
+  # Switch to sibling heading. Example: from "** Heading 4.2" to "** Heading 4.3".
+  if prevOrgLevel == orgLevel.int:
+    doAssert orgLevel != 0
+    for i in countDown(orgLevel-1, 0):
+      if headerArgsDefaults.hasKey((i.Natural, "")):
+        headerArgsDefaults[(orgLevel, "")] = headerArgsDefaults[(i.Natural, "")]
+        break
+  # Switch to child heading. Example: from "** Heading 4.2" to "*** Heading 4.2.1".
+  elif prevOrgLevel < orgLevel.int:
+    if prevOrgLevel < 0:
+      headerArgsDefaults[(orgLevel, "")] = headerArgsDefaults[(0.Natural, "")]
+    else:
+      headerArgsDefaults[(orgLevel, "")] = headerArgsDefaults[(prevOrgLevel.Natural, "")]
+  # Switch to parent heading. Example: from "** Heading 4.2" to "* Heading 5".
+  else:
+    # Do nothing in this case, because with orgLevel < prevOrgLevel,
+    # headerArgsDefaults[(orgLevel.Natural, "")] should already have
+    # been populated earlier.
+    discard
+  prevOrgLevel = orgLevel
+
 proc lineAction(line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
@@ -247,6 +284,7 @@ proc lineAction(line: string, lnum: int) =
   if line.getOrgLevel() > 0:
     orgLevel = line.getOrgLevel()
     dbg "orgLevel = {orgLevel}"
+    updateHeaderArgsDefault()
   let
     lineParts = line.strip.split(":")
     linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
@@ -331,10 +369,7 @@ proc writeFiles() =
 proc doOrgTangle(file: string) =
   ## Tangle Org file ``file``.
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
-    # Reset all the tables before reading a new Org file.
-    fileData.clear()
-    fileHeaderArgs.clear()
-    resetTangleHeaderArgsDefault()
+    resetStateVars()
     orgFile = file
     styledEcho("Parsing ", styleBright, orgFile, resetStyle, " ..")
     var lnum = 1
