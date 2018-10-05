@@ -1,0 +1,32 @@
+#+property: header-args:org :tangle tangled.org
+
+#+begin_src org
+Nested Emacs-Lisp code block in an Org snippet:
+,* Escaped Org heading
+,#+begin_src emacs-lisp
+(message "hello")
+,#+end_src
+,*this comma will go away
+,this comma remains as it's now followed by "#+" or "*"
+,# and so this comma remains too
+#+end_src
+
+The commas in below src block must also be removed:
+#+begin_src nim :tangle yes
+let escapedOrgText = """
+,* Escaped Org heading
+  ,#+begin_src emacs-lisp
+(message "hello")
+,#+end_src
+"""
+#+end_src
+
+Only one leading comma on each line in the below src block is removed:
+#+begin_src nim :tangle yes
+let doubleEscapedOrgText = """
+,,* Double Escaped Org heading
+,,#+begin_src emacs-lisp
+(message "hello")
+,,#+end_src
+"""
+#+end_src
