@@ -132,6 +132,14 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     hArgs = headerArgsDefaults[(orgLevel, "")]
     dbg "Line {lnum} - Using only Org level {orgLevel} scope, now hArgs = {hArgs}"
 
+  # If hArgs already specifies the tangled file path, use that!
+  if (hArgs.tangle != "yes") and (hArgs.tangle != "no"):
+    dbg "** Line {lnum} - Old outfile={outfile}, overriding it to {hArgs.tangle}"
+    if (not hArgs.tangle.startsWith "/"): # if relative path
+      outfile = dir / hArgs.tangle
+    else:
+      outfile = hArgs.tangle
+
   for hdrArg in hdrArgs:
     let
       hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
@@ -239,9 +247,10 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
   # value.
   if outfile != "":
     outFileName = outfile
+    dbg "** outFileName now set to {outFileName}"
     fileHeaderArgs[outFileName] = hArgs
 
-  dbg "line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+  dbg "line={lnum}, onBeginSrc={onBeginSrc}, outfile={outfile} | outFileName={outFileName}"
   if onBeginSrc and (hArgs.tangle != "no"):
     doAssert outFileName != ""
     dbg "line {lnum}: buffering enabled for `{outFileName}'"
