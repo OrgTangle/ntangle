@@ -366,6 +366,7 @@ proc getHeaderArgs(s: string): LangAndArgs =
   dbg "spaceSepParts: {spaceSepParts}"
   if spaceSepParts.len >= 3 and
      spaceSepParts[0].toLowerAscii() == "#+property:":
+    doAssert spaceSepParts[2][0] == ':'
     headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     let
       kwdParts = spaceSepParts[1].split(":")
@@ -375,6 +376,7 @@ proc getHeaderArgs(s: string): LangAndArgs =
   # ":header-args:", ":header-args+:", ":header-args:nim:"
   elif spaceSepParts.len >= 3 and
        spaceSepParts[0].toLowerAscii().startsWith(":header-args"):
+    doAssert spaceSepParts[1][0] == ':'
     headerArgsRaw = spaceSepParts[1 .. spaceSepParts.high]
     let
       kwdParts = spaceSepParts[0].split(":")
@@ -384,6 +386,7 @@ proc getHeaderArgs(s: string): LangAndArgs =
   elif spaceSepParts.len >= 2 and
        spaceSepParts[0].toLowerAscii() == "#+begin_src":
     if spaceSepParts.len >= 3:
+      doAssert spaceSepParts[2][0] == ':'
       headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     lang = spaceSepParts[1].strip()
     haType = haBeginSrc

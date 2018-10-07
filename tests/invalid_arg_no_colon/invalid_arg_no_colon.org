@@ -1,0 +1,4 @@
+Below block should not be tangled.
+#+begin_src nim tangle yes
+echo "this source block has an invalid tangle arg, no colon"
+#+end_src
