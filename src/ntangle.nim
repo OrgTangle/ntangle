@@ -278,7 +278,7 @@ proc orgRemoveEscapeCommas(line: string): string =
 
 proc lineAdjust(line: string, indent: int): string =
   ## Remove extra indentation from ``line``, and append it with newline.
-  dbg "[lineAdjust] line={line}"
+  dbg "[lineAdjust] line={line}", dvHigh
   result =
     if indent == 0:
       line & "\n"
@@ -357,7 +357,7 @@ proc getHeaderArgs(s: string): LangAndArgs =
     headerArgs: seq[string] = @[]
     headerArgPair: string
     lang: string
-  dbg "spaceSepParts: {spaceSepParts}"
+  dbg "spaceSepParts: {spaceSepParts}", dvHigh
   if spaceSepParts.len >= 3 and
      spaceSepParts[0].toLowerAscii() == "#+property:":
     doAssert spaceSepParts[2][0] == ':'
@@ -415,8 +415,9 @@ proc lineAction(line: string, lnum: int) =
     updateHeaderArgsDefault()
   let
     (haType, haLang, haArgs) = line.getHeaderArgs()
-  dbg "[line {lnum}] {line}"
-  dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
+  dbg "[line {lnum}] {line}", dvHigh
+  if haType != haNone:
+    dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
   if haType in {haPropertyKwd, haPropertyDrawer, haPropertyDrawerAppend}:
     dbg "Property header-args found [Lang={haLang}]: {haArgs}"
     parseTangleHeaderProperties(haArgs, lnum, haLang, false)
@@ -426,7 +427,7 @@ proc lineAction(line: string, lnum: int) =
       linePartsLower = lineParts.mapIt(it.toLowerAscii.strip())
     if firstLineSrcBlock:
       dbg "  first line of src block"
-    dbg "line {lnum}: bufEnabled: {bufEnabled} linePartsLower: {linePartsLower}"
+    dbg "line {lnum}: bufEnabled: {bufEnabled} linePartsLower: {linePartsLower}", dvHigh
     if bufEnabled:
       if (linePartsLower[0] == "#+end_src"):
         bufEnabled = false
