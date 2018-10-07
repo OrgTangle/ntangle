@@ -2,7 +2,8 @@
 echo "this block won't get tangled"
 #+end_src
 
-#+begin_src nim :tangle yes
+Below has extra spaces before ":tangle". But that should not matter.
+#+begin_src nim   :tangle yes
 echo "this will be tangled to tangle_no_yes.nim"
 #+end_src
 

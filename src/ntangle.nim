@@ -315,7 +315,7 @@ proc updateHeaderArgsDefault() =
   ## Update the default header args for the current orgLevel scope.
   # Switch to sibling heading. Example: from "** Heading 4.2" to "** Heading 4.3".
   if prevOrgLevel == orgLevel.int:
-    doAssert orgLevel != 0
+    assert orgLevel != 0
     for i in countDown(orgLevel-1, 0):
       if headerArgsDefaults.hasKey((i.Natural, "")):
         headerArgsDefaults[(orgLevel, "")] = headerArgsDefaults[(i.Natural, "")]
@@ -334,7 +334,7 @@ proc updateHeaderArgsDefault() =
     discard
   prevOrgLevel = orgLevel
 
-proc getHeaderArgs(s: string): LangAndArgs =
+proc getHeaderArgs(line: string, lnum: int): LangAndArgs =
   ## Get well-formatted header args.
   ##
   ## Examples:
@@ -350,17 +350,24 @@ proc getHeaderArgs(s: string): LangAndArgs =
   ## The ``lang`` field will be an empty string or a language string
   ## like ``"nim"``.
   let
-    spaceSepParts = s.strip.split(" ")
+    spaceSepPartsRaw = line.strip.split(" ")
   var
+    spaceSepParts: seq[string]
     haType: HeaderArgType = haNone
     headerArgsRaw: seq[string] = @[]
     headerArgs: seq[string] = @[]
     headerArgPair: string
     lang: string
+  for p in spaceSepPartsRaw:
+    if p.strip() != "":
+      spaceSepParts.add(p)
   dbg "spaceSepParts: {spaceSepParts}", dvHigh
   if spaceSepParts.len >= 3 and
-     spaceSepParts[0].toLowerAscii() == "#+property:":
-    doAssert spaceSepParts[2][0] == ':'
+     spaceSepParts[0].toLowerAscii() == "#+property:" and
+     spaceSepParts[1].toLowerAscii().startsWith("header-args"):
+    doAssert spaceSepParts[2][0] == ':',
+     fmt"{orgFile}:{lnum} :: {line}" & "\n" &
+       "  : The first switch in 'header-args' property must be a key with ':' prefix."
     headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     let
       kwdParts = spaceSepParts[1].split(":")
@@ -370,7 +377,9 @@ proc getHeaderArgs(s: string): LangAndArgs =
   # ":header-args:", ":header-args+:", ":header-args:nim:"
   elif spaceSepParts.len >= 3 and
        spaceSepParts[0].toLowerAscii().startsWith(":header-args"):
-    doAssert spaceSepParts[1][0] == ':'
+    doAssert spaceSepParts[1][0] == ':',
+     fmt"{orgFile}:{lnum} :: {line}" & "\n" &
+       "  : The first switch in 'header-args' drawer property must be a key with ':' prefix."
     headerArgsRaw = spaceSepParts[1 .. spaceSepParts.high]
     let
       kwdParts = spaceSepParts[0].split(":")
@@ -414,7 +423,7 @@ proc lineAction(line: string, lnum: int) =
     dbg "orgLevel = {orgLevel}"
     updateHeaderArgsDefault()
   let
-    (haType, haLang, haArgs) = line.getHeaderArgs()
+    (haType, haLang, haArgs) = getHeaderArgs(line, lnum)
   dbg "[line {lnum}] {line}", dvHigh
   if haType != haNone:
     dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
@@ -441,7 +450,7 @@ proc lineAction(line: string, lnum: int) =
           blockIndent = (line.len - line.strip(trailing=false).len)
 
         try:
-          doAssert outFileName != ""
+          assert outFileName != ""
           if firstLineSrcBlock and fileHeaderArgs[outFileName].padline:
             fileData[outFileName].add("\n")
           fileData[outFileName].add(lineAdjust(line, blockIndent))
