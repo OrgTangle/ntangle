@@ -417,7 +417,7 @@ proc lineAction(line: string, lnum: int) =
     (haType, haLang, haArgs) = line.getHeaderArgs()
   dbg "[line {lnum}] {line}"
   dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
-  if haType in {haPropertyKwd}:
+  if haType in {haPropertyKwd, haPropertyDrawer, haPropertyDrawerAppend}:
     dbg "Property header-args found [Lang={haLang}]: {haArgs}"
     parseTangleHeaderProperties(haArgs, lnum, haLang, false)
   else:

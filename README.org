@@ -46,10 +46,17 @@ You do *not* need Emacs or Org mode installed to use ~ntangle~.
 See [[#development][Development]].
 * Features
 ** Tangling /minus Noweb/ [7/8]
-- [X] Understand global tangle header-args in ~#+property~ keywords
-- [X] Understand tangle header-args directly above Org source blocks
-- [ ] Understand tangle subtree property drawer header-args
-- [X] Understand the precendence order of the tangle header-args when
+- [X] Understands global tangle header-args in ~#+property~ keywords
+- [X] Understands tangle header-args directly above Org source blocks
+- [-] Understands tangle subtree property drawer header-args
+  - [X] Rudimentary parsing of the property drawer
+    header-args. ~ntangle~ does not check the validity of the property
+    drawer (i.e. ~:PROPERTIES:~ appears immediately after the heading,
+    and it ends with ~:END:~, and that the properties are only between
+    them, etc.). Also ~header-args~ is treated the same as
+    ~header-args+~ for simplicity for now.
+  - [ ] Treat ~header-args~ vs ~header-args+~ values correctly.
+- [X] Understands the precendence order of the tangle header-args when
   a mix of global and source block header-args are used
 - [X] Language-specific header-args (e.g. ~#+property: header-args:nim
   :tangle yes~)
