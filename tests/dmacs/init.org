@@ -2,7 +2,7 @@
 #+AUTHOR: Daniel Kraus
 #+BABEL: :cache yes
 #+PROPERTY: header-args :tangle yes
-#+PROPERTY: header-args:emacs-lisp :comments link
+#+PROPERTY: header-args:emacs-lisp
 
 * Contents
 :PROPERTIES:

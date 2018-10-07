@@ -1,63 +1,42 @@
 ;;; init.el --- user-init-file                    -*- lexical-binding: t -*-
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20Initialization][Emacs Initialization:2]]
 (defvar before-user-init-time (current-time)
   "Value of `current-time' when Emacs begins loading `user-init-file'.")
 (message "Loading Emacs...done (%.3fs)"
          (float-time (time-subtract before-user-init-time
                                     before-init-time)))
-;; Emacs Initialization:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20Initialization][Emacs Initialization:3]]
 (setq gc-cons-threshold (* 256 1024 1024))
-;; Emacs Initialization:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20Initialization][Emacs Initialization:4]]
 (defvar file-name-handler-alist-old file-name-handler-alist)
 (setq file-name-handler-alist nil)
-;; Emacs Initialization:4 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20Initialization][Emacs Initialization:5]]
 (setq message-log-max 16384)
-;; Emacs Initialization:5 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20Initialization][Emacs Initialization:6]]
 (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
-;; Emacs Initialization:6 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Set%20some%20early%20UI%20settings][Set some early UI settings:1]]
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
-;; Set some early UI settings:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Set%20some%20early%20UI%20settings][Set some early UI settings:2]]
 (fringe-mode '(3 . 1))
-;; Set some early UI settings:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Set%20some%20early%20UI%20settings][Set some early UI settings:3]]
 (setq inhibit-startup-buffer-menu t)
 (setq inhibit-startup-screen t)
 (setq inhibit-startup-echo-area-message "daniel")
 (setq initial-buffer-choice t)
 (setq initial-scratch-message nil)
-;; Set some early UI settings:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Package%20Settings][Package Settings:2]]
 (setq package-enable-at-startup nil)
 ;; (package-initialize)
 ;; (setq load-prefer-newer t)
-;; Package Settings:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Borg][Borg:1]]
 (setq user-init-file (or load-file-name buffer-file-name))
 (setq user-emacs-directory (file-name-directory user-init-file))
 (add-to-list 'load-path (expand-file-name "lib/borg" user-emacs-directory))
 (require 'borg)
 (borg-initialize)
-;; Borg:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Use-Package][Use-Package:1]]
 ;;(defvar use-package-enable-imenu-support t)
 (require 'use-package)
 (if nil  ; Toggle init debug
@@ -71,13 +50,9 @@
 ;; For the :bind keyword
 (use-package bind-key :defer t)
 ;;(autoload #'use-package-autoload-keymap "use-package")
-;; Use-Package:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Epkg][Epkg:1]]
 (use-package epkg :defer t)
-;; Epkg:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Don't%20litter%20configs][Don't litter configs:1]]
 (use-package no-littering
   :demand t
   :config
@@ -96,9 +71,7 @@
 
   ;; Treat all themes as safe
   (setf custom-safe-themes t))
-;; Don't litter configs:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Moe%20theme:][Moe theme::3]]
 (use-package color-theme-sanityinc-tomorrow
   :disabled t
   :unless noninteractive
@@ -131,14 +104,10 @@
   (setq minions-mode-line-lighter "+")
   (setq minions-direct '(projectile-mode flycheck-mode multiple-cursors-mode sticky-buffer-mode))
   (minions-mode))
-;; Moe theme::3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Personal%20Information][Personal Information:1]]
 (setq user-full-name "Daniel Kraus"
       user-mail-address "daniel@kraus.my")
-;; Personal Information:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Some%20config%20helper%20functions][Some config helper functions:3]]
 (defun get-envvar-name (envvar)
   "Return environment variable name for ENVVAR.
 Code from `read-envvar-name'."
@@ -155,9 +124,7 @@ Code from `read-envvar-name'."
     (-all-p (lambda (key)
               (-any-p (lambda (k)
                         (string= (get-envvar-name key) k)) keys)) envlist)))
-;; Some config helper functions:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Change%20Emacs%20default%20config][Change Emacs default config:1]]
 ;; Don't quit Emacs on C-x C-c
 (when (daemonp)
   (global-set-key (kbd "C-x C-c") 'kill-buffer-and-window))
@@ -207,9 +174,7 @@ Code from `read-envvar-name'."
 ;; Increase the 'Limit on number of Lisp variable bindings and unwind-protects.'
 ;; mu4e seems to need more sometimes and it can be safely increased.
 (setq max-specpdl-size 2048)
-;; Change Emacs default config:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Change%20Emacs%20default%20config][Change Emacs default config:2]]
 ;; allow horizontal scrolling with "M-x >"
 (put 'scroll-left 'disabled nil)
 ;; enable narrowing commands
@@ -222,9 +187,7 @@ Code from `read-envvar-name'."
 
 ;; enable erase-buffer command
 (put 'erase-buffer 'disabled nil)
-;; Change Emacs default config:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*UI][UI:1]]
 ;; The blinking cursor is nothing, but an annoyance
 (blink-cursor-mode -1)
 
@@ -252,9 +215,7 @@ Code from `read-envvar-name'."
 
 ;; highlight the current line
 (global-hl-line-mode +1)
-;; UI:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Simple:%20Change%20some%20default%20keybinding%20(kill-this-buffer,%20up/downcase-dwim)][Simple: Change some default keybinding (kill-this-buffer, up/downcase-dwim):1]]
 (use-package simple
   :bind (("C-x k" . dakra-kill-this-buffer)
          ("M-u" . dakra-upcase-dwim)
@@ -286,9 +247,7 @@ Code from `read-envvar-name'."
   (dakra-define-up/downcase-dwim "upcase")
   (dakra-define-up/downcase-dwim "downcase")
   (dakra-define-up/downcase-dwim "capitalize"))
-;; Simple: Change some default keybinding (kill-this-buffer, up/downcase-dwim):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Auto-revert:%20Revert%20buffer%20when%20file%20changes%20on%20disk][Auto-revert: Revert buffer when file changes on disk:1]]
 (use-package autorevert
   :defer 1
   ;;:hook (find-file . auto-revert-mode)
@@ -300,9 +259,7 @@ Code from `read-envvar-name'."
 
   ;; Turn off auto revert messages
   (setq auto-revert-verbose nil))
-;; Auto-revert: Revert buffer when file changes on disk:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Epa][Epa:1]]
 (use-package epa
   :defer t
   :config
@@ -313,24 +270,18 @@ Code from `read-envvar-name'."
   :config
   ;; Let Emacs query the passphrase through the minibuffer
   (setq epg-pinentry-mode 'loopback))
-;; Epa:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Saveplace:%20Remember%20your%20location%20in%20a%20file][Saveplace: Remember your location in a file:1]]
 (use-package saveplace
   :unless noninteractive
   :config (save-place-mode))
-;; Saveplace: Remember your location in a file:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Savehist:%20Keep%20track%20of%20minibuffer%20history][Savehist: Keep track of minibuffer history:1]]
 (use-package savehist
   :unless noninteractive
   :defer 1
   :config
   (setq savehist-additional-variables '(compile-command regexp-search-ring))
   (savehist-mode 1))
-;; Savehist: Keep track of minibuffer history:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Ansi-color][Ansi-color:1]]
 (use-package ansi-color
   :commands ansi-color-display
   :hook (compilation-filter . colorize-compilation-buffer)
@@ -348,9 +299,7 @@ Code from `read-envvar-name'."
   (defun colorize-compilation-buffer ()
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region (point-min) (point-max)))))
-;; Ansi-color:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Compile][Compile:1]]
 (use-package compile
   :bind (:map compilation-mode-map
          ("C-c -" . compilation-add-separator)
@@ -373,48 +322,34 @@ Code from `read-envvar-name'."
   ;; Scroll with the compilation output
   ;; Set to 'first-error to stop scrolling on first error
   (setq compilation-scroll-output t))
-;; Compile:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Compile][Compile:2]]
 (use-package comint
   :defer t
   :config
   ;; Increase comint buffer size.
   (setq comint-buffer-maximum-size 8192))
-;; Compile:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Compile][Compile:3]]
 (message "Loading early birds...done (%.3fs)"
          (float-time (time-subtract (current-time) before-user-init-time)))
-;; Compile:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Subword:%20CamelCase%20aware%20editing%20operations][Subword: CamelCase aware editing operations:1]]
 (use-package subword
   :hook ((python-mode yaml-mode go-mode clojure-mode cider-repl-mode) . subword-mode))
-;; Subword: CamelCase aware editing operations:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Shr:%20Simple%20html%20renderer][Shr: Simple html renderer:1]]
 (use-package shr
   :defer t
   :config
   (setq shr-width 80)
   (setq shr-external-browser 'eww-browse-url)
   (setq shr-color-visible-luminance-min 80))
-;; Shr: Simple html renderer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Help][Help:1]]
 (use-package help
   :disabled t  ; I actually prefer larger help windows
   :config (temp-buffer-resize-mode))
-;; Help:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Makefile][Makefile:1]]
 (use-package make-mode
   ;; Files like `Makefile.docker' are also gnu make
   :mode (("Makefile" . makefile-gmake-mode)))
-;; Makefile:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Goto-addr:%20Buttonize%20URLs%20and%20e-mail%20addresses%20in%20the%20current%20buffer][Goto-addr: Buttonize URLs and e-mail addresses in the current buffer:1]]
 (use-package goto-addr
   :hook ((compilation-mode . goto-address-mode)
          (prog-mode . goto-address-prog-mode)
@@ -423,9 +358,7 @@ Code from `read-envvar-name'."
   :bind (:map goto-address-highlight-keymap
          ("<RET>" . goto-address-at-point)
          ("M-<RET>" . newline)))
-;; Goto-addr: Buttonize URLs and e-mail addresses in the current buffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Time][Time:1]]
 (use-package time
   :defer 10
   :config
@@ -442,9 +375,7 @@ Code from `read-envvar-name'."
   (setq display-time-24hr-format t)
   ;; Show time in modeline
   (display-time-mode))
-;; Time:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Calendar][Calendar:1]]
 (use-package calendar
   :hook (calendar-today-visible . calendar-mark-today)
   :config
@@ -462,16 +393,12 @@ Code from `read-envvar-name'."
         calendar-location-name "Karlsruhe, Germany")
   ;; Highlight public holidays
   (setq calendar-holiday-marker t))
-;; Calendar:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Alert:%20Growl-style%20notification%20system][Alert: Growl-style notification system:1]]
 (use-package alert :defer t
   :config
   ;; send alerts by default to D-Bus
   (setq alert-default-style 'notifications))
-;; Alert: Growl-style notification system:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Sauron:%20Event%20log%20(listen%20to%20d-bus%20and%20other%20messages%20and%20show%20them)][Sauron: Event log (listen to d-bus and other messages and show them):1]]
 (use-package sauron
   :disabled t
   :if (daemonp)
@@ -488,14 +415,10 @@ Code from `read-envvar-name'."
 
   (setq sauron-watch-nicks '("dakra"))
   (sauron-start-hidden))
-;; Sauron: Event log (listen to d-bus and other messages and show them):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eldoc:%20Display%20help][Eldoc: Display help:1]]
 (use-package eldoc
   :hook (prog-mode . eldoc-mode))
-;; Eldoc: Display help:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Dimmer:%20Visually%20highlight%20the%20selected%20buffer][Dimmer: Visually highlight the selected buffer:1]]
 (use-package dimmer
   :unless noninteractive
   :defer 10
@@ -503,53 +426,37 @@ Code from `read-envvar-name'."
   (setq dimmer-fraction 0.25)
   ;;(setq dimmer-use-colorspace ':rgb)
   (dimmer-mode))
-;; Dimmer: Visually highlight the selected buffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Hl-todo:%20Highlight%20and%20navigate%20TODO%20keywords][Hl-todo: Highlight and navigate TODO keywords:1]]
 (use-package hl-todo
   :defer 2
   :config (global-hl-todo-mode))
-;; Hl-todo: Highlight and navigate TODO keywords:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Fill-column-indicator][Fill-column-indicator:1]]
 (use-package fill-column-indicator
   :hook ((emacs-lisp git-commit-setup) . fci-mode))
-;; Fill-column-indicator:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Volatile%20highlights][Volatile highlights:1]]
 (use-package volatile-highlights
   :defer 10
   :config (volatile-highlights-mode t))
-;; Volatile highlights:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*beacon:%20Highlight%20current%20line/cursor%20when%20switching%20frames][beacon: Highlight current line/cursor when switching frames:1]]
 (use-package beacon
   :defer 5
   :config (beacon-mode 1))
-;; beacon: Highlight current line/cursor when switching frames:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*which-key:%20Display%20available%20keybindings%20in%20popup][which-key: Display available keybindings in popup:1]]
 (use-package which-key
   :defer 10
   :config (which-key-mode 1))
-;; which-key: Display available keybindings in popup:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*which-func:%20Show%20the%20name%20of%20the%20current%20function%20definition%20in%20the%20modeline][which-func: Show the name of the current function definition in the modeline:1]]
 (use-package which-func
   :defer 5
   :config (which-function-mode 1))
-;; which-func: Show the name of the current function definition in the modeline:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Nicer%20buffer%20name%20for%20buffers%20with%20same%20name][Nicer buffer name for buffers with same name:1]]
 (use-package uniquify
   :defer 5
   :config
   (setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
   (setq uniquify-buffer-name-style 'forward)
   (setq uniquify-separator "/"))
-;; Nicer buffer name for buffers with same name:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Highlight%20indentions][Highlight indentions:1]]
 ;; highlight indentations in python
 (use-package highlight-indent-guides
   :hook ((python-mode sass-mode yaml-mode) . highlight-indent-guides-mode)
@@ -566,9 +473,7 @@ Code from `read-envvar-name'."
   (setq highlight-indent-guides-auto-odd-face-perc 15)
   (setq highlight-indent-guides-auto-even-face-perc 15)
   (setq highlight-indent-guides-auto-character-face-perc 20))
-;; Highlight indentions:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emoji%20font][Emoji font:1]]
 ;; emoji font
 ;; package ttf-symbola has to be installed
 ;; Just use "C-x 8 RET <type name>" insead
@@ -580,24 +485,18 @@ Code from `read-envvar-name'."
 ;; Hook for when a frame is created with emacsclient
 ;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
 (add-hook 'after-make-frame-functions '--set-emoji-font)
-;; Emoji font:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Automatically%20remove%20trailing%20whitespace%20(only%20if%20I%20put%20them%20there)][Automatically remove trailing whitespace (only if I put them there):1]]
 (use-package ws-butler
   :hook ((text-mode prog-mode) . ws-butler-mode)
   :config (setq ws-butler-keep-whitespace-before-point nil))
-;; Automatically remove trailing whitespace (only if I put them there):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Highlight%20long%20lines][Highlight long lines:1]]
 (use-package whitespace
   :hook (prog-mode . whitespace-mode)
   :config
   (setq whitespace-style '(face tabs empty trailing lines-tail))
   ;; highlight lines with more than `fill-column' characters
   (setq whitespace-line-column nil))
-;; Highlight long lines:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Zone:%20Emacs%20screen%20saver][Zone: Emacs screen saver:1]]
 (use-package zone
   :defer t
   :config
@@ -623,16 +522,12 @@ Code from `read-envvar-name'."
   :config
   (setq zone-programs (vconcat zone-programs [zone-matrix]))
   (setq zmx-unicode-mode t))
-;; Zone: Emacs screen saver:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Sticky-buffer:%20Lock%20a%20buffer%20to%20a%20window][Sticky-buffer: Lock a buffer to a window:1]]
 (define-minor-mode sticky-buffer-mode
   "Make the current window always display this buffer."
   nil " sticky" nil
   (set-window-dedicated-p (selected-window) sticky-buffer-mode))
-;; Sticky-buffer: Lock a buffer to a window:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Lossage:%20Live%20update%20lossage%20buffer][Lossage: Live update lossage buffer:1]]
 (defun update-lossage-buffer ()
   "Update the \"Lossage\" buffer.
 For this to work, visit the lossage buffer, and call
@@ -647,9 +542,7 @@ M-x rename-buffer Lossage RET"
   "Update lossage"
   (interactive)
   (add-hook 'post-command-hook #'update-lossage-buffer nil 'local))
-;; Lossage: Live update lossage buffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*hippie-exp:%20Expand%20by%20fuzzy%20matching%20text%20in%20open%20buffers][hippie-exp: Expand by fuzzy matching text in open buffers:1]]
 (use-package hippie-exp
   :bind (("M-/" . hippie-expand))
   :config
@@ -663,15 +556,11 @@ M-x rename-buffer Lossage RET"
                                            try-expand-line
                                            try-complete-lisp-symbol-partially
                                            try-complete-lisp-symbol)))
-;; hippie-exp: Expand by fuzzy matching text in open buffers:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*rainbow-delimiters:%20Different%20color%20for%20each%20paranthesis%20level][rainbow-delimiters: Different color for each paranthesis level:1]]
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
   :hook ((emacs-lisp-mode lisp-mode hy-mode clojure-mode cider-repl-mode) . rainbow-delimiters-mode))
-;; rainbow-delimiters: Different color for each paranthesis level:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*fancy-narrow:%20Fancier%20narrow][fancy-narrow: Fancier narrow:1]]
 (use-package fancy-narrow
   :bind (("C-x n" . fancy-narrow-or-widen-dwim)
          ("C-x N" . narrow-or-widen-dwim))
@@ -729,9 +618,7 @@ is already narrowed."
           ((derived-mode-p 'latex-mode)
            (LaTeX-narrow-to-environment))
           (t (narrow-to-defun)))))
-;; fancy-narrow: Fancier narrow:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*crux:%20Various%20small%20useful%20utility%20functions][crux: Various small useful utility functions:1]]
 (use-package crux
   :bind (("C-c u" . crux-view-url)
          ("C-c f c" . write-file)
@@ -742,9 +629,7 @@ is already narrowed."
          ("C-a"   . crux-move-beginning-of-line)
          ([(shift return)] . crux-smart-open-line)
          ([(control shift return)] . crux-smart-open-line-above)))
-;; crux: Various small useful utility functions:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*smartparens][smartparens:1]]
 (use-package smartparens
   :defer 1
   :hook ((
@@ -809,9 +694,7 @@ is already narrowed."
 
   ;; use smartparens-mode everywhere
   (smartparens-global-mode))
-;; smartparens:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Misc][Misc:1]]
 ;; comment-dwim-2 is a replacement for the Emacs' built-in command
 ;; comment-dwim which includes more comment features, including:
 ;; - commenting/uncommenting the current line (or region, if active)
@@ -829,9 +712,7 @@ is already narrowed."
 (use-package whole-line-or-region
   :defer 1
   :config (whole-line-or-region-global-mode t))
-;; Misc:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*smartrep:%20Repeat%20previous%20command%20without%20prefix%20key][smartrep: Repeat previous command without prefix key:1]]
 (use-package operate-on-number
   :defer t)
 (use-package smartrep
@@ -855,9 +736,7 @@ is already narrowed."
       ("#" . apply-operation-to-number-at-point)
       ("%" . apply-operation-to-number-at-point)
       ("'" . operate-on-number-at-point))))
-;; smartrep: Repeat previous command without prefix key:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*copy-as-format:%20Copy%20text%20as%20GitHub/Slack/JIRA/HipChat/...%20formatted%20code][copy-as-format: Copy text as GitHub/Slack/JIRA/HipChat/... formatted code:1]]
 (use-package copy-as-format
   :bind (("C-c w g" . copy-as-format-github)
          ("C-c w h" . copy-as-format-hipchat-pidgin)
@@ -874,16 +753,12 @@ is already narrowed."
     (interactive)
     (setq copy-as-format-default "hipchat-pidgin")
     (copy-as-format)))
-;; copy-as-format: Copy text as GitHub/Slack/JIRA/HipChat/... formatted code:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*zop-to-char:%20Remove%20multiple%20characters%20at%20once][zop-to-char: Remove multiple characters at once:1]]
 ;; Replace zap-to-char functionaity with the more powerful zop-to-char
 (use-package zop-to-char
   :bind (("M-z" . zop-up-to-char)
          ("M-Z" . zop-to-char)))
-;; zop-to-char: Remove multiple characters at once:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Cycle%20outline%20and%20code%20visibility][Cycle outline and code visibility:1]]
 ;; Minor mode to selectively hide/show code and comment blocks
 (use-package hideshow
   :hook (prog-mode  . hs-minor-mode))
@@ -896,9 +771,7 @@ is already narrowed."
   :bind (:map outline-minor-mode-map
          ([C-tab] . bicycle-cycle)
          ([backtab] . bicycle-cycle-global)))
-;; Cycle outline and code visibility:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*edit-indirect:%20Edit%20a%20region%20in%20a%20separate%20buffer][edit-indirect: Edit a region in a separate buffer:1]]
 (use-package edit-indirect
   :bind (("C-c '" . edit-indirect-dwim)
          :map edit-indirect-mode-map
@@ -945,32 +818,24 @@ mark the string and call `edit-indirect-region' with it."
         (error "Invalide mode `%s'" mode-str))
       (funcall mode)))
   (setq edit-indirect-guess-mode-function #'edit-indirect-guess-mode-fn))
-;; edit-indirect: Edit a region in a separate buffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*with-editor:%20Use%20local%20Emacs%20instance%20as%20$EDITOR%20(e.g.%20in%20`git%20commit'%20or%20`crontab%20-e')][with-editor: Use local Emacs instance as $EDITOR (e.g. in `git commit' or `crontab -e'):1]]
 (use-package with-editor
   ;; Use local Emacs instance as $EDITOR (e.g. in `git commit' or `crontab -e')
   :hook ((shell-mode eshell-mode term-exec) . with-editor-export-editor))
-;; with-editor: Use local Emacs instance as $EDITOR (e.g. in `git commit' or `crontab -e'):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Move%20text][Move text:1]]
 (use-package move-text
   :bind (([(control shift up)]   . move-text-up)
          ([(control shift down)] . move-text-down)
          ([(meta shift up)]      . move-text-up)
          ([(meta shift down)]    . move-text-down)))
-;; Move text:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Grep%20(wgrep/rg/ag)][Grep (wgrep/rg/ag):1]]
 (use-package wgrep
   :bind (:map grep-mode-map
          ("C-x C-q" . wgrep-change-to-wgrep-mode))
   :config (setq wgrep-auto-save-buffer t))
 (use-package wgrep-ag
   :after wgrep)
-;; Grep (wgrep/rg/ag):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Grep-context:%20Get%20more%20context%20for%20compilation/grep%20buffers%20by%20pressing%20+/-][Grep-context: Get more context for compilation/grep buffers by pressing +/-:1]]
 (use-package grep-context
   :after ivy
   :bind (:map compilation-mode-map
@@ -982,18 +847,14 @@ mark the string and call `edit-indirect-region' with it."
          :map ivy-occur-grep-mode-map
          ("+" . grep-context-more-around-point)
          ("-" . grep-context-less-around-point)))
-;; Grep-context: Get more context for compilation/grep buffers by pressing +/-:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Re-builder][Re-builder:1]]
 ;; You can change syntax in regex-builder with "C-c TAB"
 ;; "read" is 'code' syntax
 ;; "string" is already read and no extra escaping. Like what Emacs prompts interactively
 (use-package re-builder
   :defer t
   :config (setq reb-re-syntax 'string))
-;; Re-builder:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Visual-regex:][Visual-regex::1]]
 (use-package visual-regexp
   :bind (("C-c r s" . query-replace)
          ("C-c r R" . vr/replace)
@@ -1002,9 +863,7 @@ mark the string and call `edit-indirect-region' with it."
 
 (use-package visual-regexp-steroids
   :after visual-regexp)
-;; Visual-regex::1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Prescient][Prescient:1]]
 (use-package prescient
   :defer t
   :config (prescient-persist-mode))
@@ -1014,14 +873,10 @@ mark the string and call `edit-indirect-region' with it."
 (use-package company-prescient
   :after company
   :config (company-prescient-mode))
-;; Prescient:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*deadgrep:%20Interface%20for%20ripgrep][deadgrep: Interface for ripgrep:1]]
 (use-package deadgrep
   :bind ("<f5>" . deadgrep))
-;; deadgrep: Interface for ripgrep:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Company:%20Auto%20completion][Company: Auto completion:1]]
 (use-package company
   :defer 1
   :bind (:map company-active-map
@@ -1081,9 +936,7 @@ mark the string and call `edit-indirect-region' with it."
 (use-package company-box
   :disabled t
   :hook (company-mode . company-box-mode))
-;; Company: Auto completion:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Helpful:%20A%20better%20help%20buffer][Helpful: A better help buffer:1]]
 (use-package helpful
   :bind (("C-h f" . helpful-function)
          ("C-h v" . helpful-variable)
@@ -1146,9 +999,7 @@ mark the string and call `edit-indirect-region' with it."
     (interactive)
     (when (helpful-visit-reference)
       (org-babel-tangle-jump-to-org))))
-;; Helpful: A better help buffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Projectile][Projectile:1]]
 (use-package projectile
   :defer t
   :bind-keymap (("s-p"   . projectile-command-map)
@@ -1181,9 +1032,7 @@ mark the string and call `edit-indirect-region' with it."
   ;; C-u C-c p f to clear cache before search.
   (setq projectile-enable-caching nil)
   (counsel-projectile-mode))
-;; Projectile:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Treemacs:%20A%20tree%20layout%20file%20explorer][Treemacs: A tree layout file explorer:1]]
 (use-package treemacs
   :bind (([f8]        . treemacs-toggle-or-select)
          :map treemacs-mode-map
@@ -1231,19 +1080,13 @@ mark the string and call `edit-indirect-region' with it."
          ("C-p" . nil)  ; I often still type C-p for UP
          ("C-t p" . treemacs-projectile))
   :config (setq treemacs-header-function #'treemacs-projectile-create-header))
-;; Treemacs: A tree layout file explorer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Flx:%20Fuzzy%20search][Flx: Fuzzy search:1]]
 (use-package flx :defer t)
-;; Flx: Fuzzy search:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Smex:%20Improved%20M-x][Smex: Improved M-x:1]]
 (use-package smex
   :disabled t
   :defer t)
-;; Smex: Improved M-x:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Ivy][Ivy:1]]
 (use-package ivy
   :bind (("C-x b"   . dakra-ivy-switch-buffer)
          ("C-x B"   . ivy-switch-buffer-other-window)
@@ -1346,17 +1189,13 @@ With one prefix arg, show only EXWM buffers. With two, show all buffers."
   (setq ivy-rich-parse-remote-buffer nil)
   (setq ivy-rich-switch-buffer-align-virtual-buffer t
         ivy-rich-path-style 'abbrev))
-;; Ivy:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Swiper:%20Search%20with%20ivy][Swiper: Search with ivy:1]]
 (use-package swiper
   :bind (;;("C-s" . swiper)  ; Use counsel-grep-or-swiper
          :map swiper-map
          ("M-h" . swiper-avy)
          ("M-c" . swiper-mc)))
-;; Swiper: Search with ivy:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Counsel][Counsel:1]]
 (use-package counsel
   :bind (("C-s"     . counsel-grep-or-swiper)
          ("C-o"     . nil)  ; Remove old keybinding (open-line)
@@ -1451,9 +1290,7 @@ go up multiple parent directories."
   (ivy-set-occur 'counsel-projectile 'counsel-projectile-find-file-occur)
 
   (counsel-projectile-mode))
-;; Counsel:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Navigation][Navigation:1]]
 (use-package bookmark
   :defer t
   :config (setq bookmark-save-flag 1))
@@ -1461,21 +1298,15 @@ go up multiple parent directories."
 (use-package back-button
   :defer 2
   :config (back-button-mode))
-;; Navigation:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Navigation][Navigation:2]]
 ;; Goto last change
 (use-package goto-chg
   :bind (("C-c \\" . goto-last-change)
          ("C-c |" . goto-last-change-reverse)))
-;; Navigation:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Ace-window:%20Select/move/swap%20windows][Ace-window: Select/move/swap windows:1]]
 (use-package ace-window
   :bind ("s-a" . ace-window))
-;; Ace-window: Select/move/swap windows:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*ibuffer][ibuffer:1]]
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer))
 
@@ -1487,9 +1318,7 @@ go up multiple parent directories."
     (ibuffer-projectile-set-filter-groups)
     (unless (eq ibuffer-sorting-mode 'alphabetic)
       (ibuffer-do-sort-by-alphabetic))))
-;; ibuffer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Imenu][Imenu:1]]
 (use-package imenu
   :defer t
   ;;:hook (emacs-lisp-mode . imenu-use-package)
@@ -1505,9 +1334,7 @@ go up multiple parent directories."
 (use-package imenu-anywhere
   :bind (("M-I" . ivy-imenu-anywhere)
          ("C-c i" . ivy-imenu-anywhere)))
-;; Imenu:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Recentf][Recentf:1]]
 (use-package recentf
   :defer 2
   :config
@@ -1521,9 +1348,7 @@ go up multiple parent directories."
         recentf-auto-cleanup 'never)
 
   (recentf-mode))
-;; Recentf:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*View%20Large%20Files][View Large Files:1]]
 ;; View Large Files
 (use-package vlf-setup
   ;; Require vlf-setup which autoloads `vlf'
@@ -1535,9 +1360,7 @@ go up multiple parent directories."
 ;; Logview provides syntax highlighting, filtering and other features for various log files
 (use-package logview
   :defer t)
-;; View Large Files:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*PDF%20Tools][PDF Tools:1]]
 ;; Better pdf viewer with search, annotate, highlighting etc
 ;; 'poppler' and 'poppler-glib' must be installed
 (use-package pdf-tools
@@ -1564,9 +1387,7 @@ go up multiple parent directories."
   (setq pdf-view-midnight-colors '("#c6c6c6" . "#363636"))
   (add-hook 'pdf-view-mode-hook (lambda ()
                                   (pdf-view-midnight-minor-mode))))
-;; PDF Tools:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Misc][Misc:1]]
 (use-package edit-server
   :if (daemonp)
   :defer 10
@@ -1580,26 +1401,18 @@ go up multiple parent directories."
           ("lab\\.ebenefuenf\\.com" . gfm-mode)
           ("jira.paesslergmbh.de" . jira-markup-mode)))
   (edit-server-start))
-;; Misc:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Misc][Misc:2]]
 (use-package fabric
   :defer t)
-;; Misc:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Misc][Misc:3]]
 (use-package calc
   :bind ("<XF86Calculator>" . quick-calc))
-;; Misc:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Misc][Misc:4]]
 ;; Type like a hacker
 (use-package hacker-typer
   :defer t
   :config (setq hacker-typer-remove-comments t))
-;; Misc:4 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Dired][Dired:1]]
 ;; dired config mostly from https://github.com/Fuco1/.emacs.d/blob/master/files/dired-defs.org
 (use-package dired
   :bind (("C-x d" . dired)
@@ -1689,9 +1502,7 @@ go up multiple parent directories."
 (use-package dired-async  ; Part of async
   :after dired
   :config (dired-async-mode 1))
-;; Dired:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Dired-hacks][Dired-hacks:1]]
 (use-package dired-rainbow
   :after dired
   :config
@@ -1764,9 +1575,7 @@ go up multiple parent directories."
   :bind (:map dired-mode-map
          ("i" . dired-subtree-insert)
          ("I" . dired-subtree-remove)))
-;; Dired-hacks:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Helm][Helm:1]]
 ;;; Helm config
 (use-package helm
   :disabled t
@@ -1874,9 +1683,7 @@ go up multiple parent directories."
   :after helm
   :bind ("\C-s" . swiper-helm)
   )
-;; Helm:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Hydras][Hydras:1]]
 ;; Switch on 'umlaut-mode' for easier Umlaut usage
 (define-minor-mode umlaut-mode
   "A mode for conveniently using Umlauts in Emacs"
@@ -1998,9 +1805,7 @@ go up multiple parent directories."
     ("p" (dakra/insert-unicode "POUND SIGN"))
     ("r" (dakra/insert-unicode "RIGHTWARDS ARROW"))
     ("m" (dakra/insert-unicode "MICRO SIGN"))))
-;; Hydras:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Tramp][Tramp:1]]
 (use-package tramp
   :defer t
   :config
@@ -2031,9 +1836,7 @@ go up multiple parent directories."
                            ;; Add tramp proxy for atomx user
                            (nil "atomx" "/ssh:%h:")))
     (add-to-list 'tramp-default-proxies-alist tramp-proxies)))
-;; Tramp:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eshell][Eshell:1]]
 ;; Always show file size in human readable format
 (setq eshell-ls-initial-args "-h")
 
@@ -2252,9 +2055,7 @@ file to edit."
 
 (use-package eshell-bookmark
   :after eshell)
-;; Eshell:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Prompt][Prompt:1]]
 ;; Show git info in prompt
 (use-package eshell-git-prompt
   :disabled t  ; Use eshell-prompt-extras
@@ -2270,19 +2071,13 @@ file to edit."
   (autoload 'epe-theme-dakrone "eshell-prompt-extras")
   (setq eshell-highlight-prompt nil
         eshell-prompt-function 'epe-theme-dakrone))
-;; Prompt:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Z:%20cd%20to%20frequent%20directory][Z: cd to frequent directory:1]]
 (use-package eshell-z
   :after eshell)
-;; Z: cd to frequent directory:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eshel-up:%20Quickly%20go%20to%20a%20specific%20parent%20directory%20in%20eshell][Eshel-up: Quickly go to a specific parent directory in eshell:1]]
 (use-package eshell-up
   :after eshell)
-;; Eshel-up: Quickly go to a specific parent directory in eshell:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eshell-fringe-status:%20Show%20last%20status%20in%20fringe][Eshell-fringe-status: Show last status in fringe:1]]
 (use-package eshell-fringe-status
   :hook (eshell-mode . eshell-fringe-status-mode)
   :config
@@ -2308,9 +2103,7 @@ file to edit."
      ] 18 4 'center)
   (setq eshell-fringe-status-success-bitmap 'efs-line-bitmap)
   (setq eshell-fringe-status-failure-bitmap 'efs-line-bitmap))
-;; Eshell-fringe-status: Show last status in fringe:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Autocomplete][Autocomplete:1]]
 (use-package fish-completion
   :if (executable-find "fish")
   :after eshell
@@ -2327,9 +2120,7 @@ file to edit."
 
 (use-package pcmpl-pip
   :after pcomplete)
-;; Autocomplete:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emacs%20vc%20settings][Emacs vc settings:1]]
 ;; Nicer diff (should be taken from global .config/git/config)
 (setq vc-git-diff-switches '("--indent-heuristic"))
 
@@ -2356,9 +2147,7 @@ file to edit."
   :config
   ;; (setq bug-reference-bug-regexp "\\([Bb]ug\\|[Pp]ull request\\|[Ii]ssue\\|[PpMm][Rr]\\|[Ff]ix\\) #\\([0-9]+\\(?:#[0-9]+\\)?\\)")
   (setq bug-reference-bug-regexp "#\\(?2:[0-9]+\\)"))
-;; Emacs vc settings:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Diff-hl:%20Show%20git%20status%20in%20fringe][Diff-hl: Show git status in fringe:1]]
 (use-package diff-hl
   :hook (((prog-mode conf-mode vc-dir-mode ledger-mode) . turn-on-diff-hl-mode)
          (magit-post-refresh . diff-hl-magit-post-refresh))
@@ -2385,9 +2174,7 @@ file to edit."
 ;;(global-set-key (kbd "C-x v =") 'git-gutter:popup-hunk)
 ;;(global-set-key (kbd "C-x v s") 'git-gutter:stage-hunk)
 ;;(global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk)
-;; Diff-hl: Show git status in fringe:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Magit][Magit:1]]
 (use-package gitconfig-mode
   :mode ("/\\.gitconfig\\'"      "/\\.git/config\\'"
          "/modules/.*/config\\'" "/git/config\\'"
@@ -2554,9 +2341,7 @@ file to edit."
   (setq magithub-cache t)
   (setq magithub-api-timeout 5)
   (magithub-feature-autoinject t))
-;; Magit:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Browse-at-remote:%20Open%20website%20(github/gitlab)%20for%20current%20buffer/line/log][Browse-at-remote: Open website (github/gitlab) for current buffer/line/log:1]]
 ;; open current line/region/dired/commit in github
 (use-package browse-at-remote
   :bind (("C-c G" . dakra-browse-at-remote))
@@ -2577,18 +2362,14 @@ When called with 2 prefix arguments only open in browser and don't copy."
   (add-to-list 'browse-at-remote-remote-type-domains '("git.ebenefuenf.com" . "gitlab"))
   (add-to-list 'browse-at-remote-remote-type-domains '("lab.ebenefuenf.com" . "gitlab"))
   (setq browse-at-remote-prefer-symbolic nil))
-;; Browse-at-remote: Open website (github/gitlab) for current buffer/line/log:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*General%20setup][General setup:1]]
 ;; Increase fill-column for programming to 100
 (defun dakra-prog-mode-init ()
   ;; Only auto-fill comments in prog-mode
   (set (make-local-variable 'comment-auto-fill-only-comments) t)
   (setq fill-column 110))
 (add-hook 'prog-mode-hook 'dakra-prog-mode-init)
-;; General setup:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*C/C++][C/C++:1]]
 (use-package cmake-font-lock
   :hook (cmake-mode . cmake-font-lock-activate))
 
@@ -2610,20 +2391,14 @@ When called with 2 prefix arguments only open in browser and don't copy."
 
 (use-package irony-eldoc
   :hook (irony-mode))
-;; C/C++:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*GLSL:%20OpenGLSL%20shader][GLSL: OpenGLSL shader:1]]
 (use-package glsl-mode
   :mode ("\\.vert\\'" "\\.frag\\'" "\\.glsl\\'" "\\.geom\\'"))
-;; GLSL: OpenGLSL shader:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*GLSL:%20OpenGLSL%20shader][GLSL: OpenGLSL shader:2]]
 (use-package company-glsl
   :after glsl-mode
   :config (add-to-list 'company-backends 'company-glsl))
-;; GLSL: OpenGLSL shader:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Configs%20(yaml/toml/ini/.conf/etc)][Configs (yaml/toml/ini/.conf/etc):1]]
 ;; Associate more files with conf-mode
 (use-package conf-mode
   :mode ("mbsyncrc\\'" "msmtprc\\'" "pylintrc\\'" "\\.cnf\\'"
@@ -2652,24 +2427,16 @@ When called with 2 prefix arguments only open in browser and don't copy."
   (add-hook 'yaml-mode-hook #'dakra-prog-mode-init)
   (add-hook 'yaml-mode-hook
             (lambda () (add-hook 'before-save-hook 'whitespace-cleanup nil t))))
-;; Configs (yaml/toml/ini/.conf/etc):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Systemd][Systemd:1]]
 (use-package systemd
   :mode ("\\.service\\'" "\\.timer\\'"))
-;; Systemd:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Nginx][Nginx:1]]
 (use-package nginx-mode
   :mode ("/etc/nginx/conf.d/.*" "/etc/nginx/.*\\.conf\\'"))
-;; Nginx:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Apache][Apache:1]]
 (use-package apache-mode
   :mode ("\\.htaccess\\'" "httpd\\.conf\\'" "srm\\.conf\\'" "access\\.conf\\'"))
-;; Apache:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Docker][Docker:1]]
 (use-package docker
   :bind-keymap ("C-c d" . docker-command-map)
   :init
@@ -2684,14 +2451,10 @@ When called with 2 prefix arguments only open in browser and don't copy."
   :defer t)
 (use-package docker-tramp
   :after tramp)
-;; Docker:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Debugging][Debugging:1]]
 (use-package realgud
   :defer t)
-;; Debugging:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Elixir][Elixir:1]]
 (use-package elixir-mode
   :mode ("\\.ex\\'" "\\.exs\\'" "\\.elixir\\'")
   :config
@@ -2705,14 +2468,10 @@ When called with 2 prefix arguments only open in browser and don't copy."
                    :post-handlers '(sp-ruby-def-post-handler)
                    :actions '(insert navigate)))
   (use-package alchemist))
-;; Elixir:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Fish][Fish:1]]
 (use-package fish-mode
   :mode "\\.fish\\'")
-;; Fish:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Go][Go:1]]
 ;; Go
 ;; For better support install:
 ;; arch package `go-tools' for goimports, guru and godoc
@@ -2781,17 +2540,13 @@ When called with 2 prefix arguments only open in browser and don't copy."
 
 (use-package go-projectile
   :after (projectile go-mode))
-;; Go:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Haskell][Haskell:1]]
 (use-package haskell-mode
   :hook (haskell-mode . haskell-indentation-mode))
 
 (use-package intero
   :hook (haskell-mode . intero-mode))
-;; Haskell:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Javascript][Javascript:1]]
 (use-package prettier-js
   :defer t
   ;;:init (add-hook 'js2-mode-hook (lambda () (add-hook 'before-save-hook 'prettier-before-save)))
@@ -2921,13 +2676,9 @@ When called with 2 prefix arguments only open in browser and don't copy."
 ;; (eval-after-load 'js2-mode
 ;;   '(add-hook 'js2-mode-hook #'add-node-modules-path))
 (use-package add-node-modules-path :defer t)
-;; Javascript:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Javascript][Javascript:2]]
 (use-package ng2-mode :defer t)
-;; Javascript:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Lisps][Lisps:1]]
 ;; Nicer elisp regex syntax highlighting
 (use-package easy-escape
   :hook ((emacs-lisp-mode lisp-mode) . easy-escape-minor-mode))
@@ -3010,9 +2761,7 @@ Lisp function does not specify a special indentation."
                                         indent-point normal-indent))
                  (method
                   (funcall method indent-point state)))))))))
-;; Lisps:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Elisp][Elisp:1]]
 (use-package subr-x
   :defer t
   :config
@@ -3027,21 +2776,15 @@ Lisp function does not specify a special indentation."
   (add-hook 'emacs-lisp-mode-hook (lambda ()
                                     ;;(eldoc-mode +1)
                                     (setq mode-name "EL"))))
-;; Elisp:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Helper%20libraries%20(dash,%20s,%20marshal)][Helper libraries (dash, s, marshal):1]]
 (use-package dash  :defer t
   :config (dash-enable-font-lock))
 
 (use-package s  :defer t)
-;; Helper libraries (dash, s, marshal):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Request][Request:1]]
 (use-package request
   :defer t)
-;; Request:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Auto-compile][Auto-compile:1]]
 (use-package auto-compile
   :disabled t  ; I rather trigger a new compile by hand
   :defer 10
@@ -3055,27 +2798,19 @@ Lisp function does not specify a special indentation."
   (setq auto-compile-update-autoloads             t)
   (add-hook 'auto-compile-inhibit-compile-hook
             'auto-compile-inhibit-compile-detached-git-head))
-;; Auto-compile:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Litable:%20Live%20preview%20for%20elisp][Litable: Live preview for elisp:1]]
 (use-package litable
   :defer t)
-;; Litable: Live preview for elisp:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Package%20helpers][Package helpers:1]]
 (use-package package-lint
   :defer t)
 (use-package flycheck-package
   :after flycheck
   :config (flycheck-package-setup))
-;; Package helpers:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*El2markdown:%20Convert%20package%20commentary%20to%20markdown][El2markdown: Convert package commentary to markdown:1]]
 (use-package el2markdown
   :defer t)
-;; El2markdown: Convert package commentary to markdown:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Common%20Lisp][Common Lisp:2]]
 (use-package slime
   :hook (lisp-mode slime-lisp-mode-hook)
   :bind (:map slime-mode-indirect-map
@@ -3088,25 +2823,17 @@ Lisp function does not specify a special indentation."
 (use-package slime-company
   :after (slime company)
   :config (slime-setup '(slime-fancy slime-company)))
-;; Common Lisp:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Clojure][Clojure:1]]
 (use-package clojure-mode
   :defer t)
-;; Clojure:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*CIDER][CIDER:1]]
 (use-package cider
   :hook ((cider-mode cider-repl-mode) . cider-company-enable-fuzzy-completion))
-;; CIDER:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Hy][Hy:1]]
 ;;; Lisp in python vm
 (use-package hy-mode
   :mode "\\.hy\\'")
-;; Hy:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Lua][Lua:1]]
 (use-package lua-mode
   :mode "\\.lua\\'"
   :interpreter ("lua" . lua-mode)
@@ -3125,9 +2852,7 @@ Lisp function does not specify a special indentation."
                                     company-etags
                                     company-dabbrev-code
                                     company-yasnippet)))))
-;; Lua:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Markup%20Languages][Markup Languages:1]]
 (use-package jira-markup-mode
   :mode ("\\.confluence\\'" "/itsalltext/.*jira.*\\.txt$"))
 
@@ -3141,9 +2866,7 @@ Lisp function does not specify a special indentation."
   (add-to-list 'markdown-code-lang-modes '("ini" . conf-mode))
   ;; use pandoc with source code syntax highlighting to preview markdown (C-c C-c p)
   (setq markdown-command "pandoc -s --highlight-style pygments -f markdown_github -t html5"))
-;; Markup Languages:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Octave][Octave:1]]
 (use-package octave
   :mode ("\\.m\\'" . octave-mode)
   :interpreter ("octave" . octave-mode)
@@ -3156,14 +2879,10 @@ Lisp function does not specify a special indentation."
     (if (region-active-p)
         (octave-send-region (region-beginning) (region-end))
       (octave-send-line))))
-;; Octave:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*PHP][PHP:1]]
 (use-package php-mode
   :defer t)
-;; PHP:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Python][Python:1]]
 (use-package cython-mode
   :mode ("\\.pyd\\'" "\\.pyi\\'" "\\.pyx\\'"))
 (use-package flycheck-cython
@@ -3421,23 +3140,17 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
 ;;(add-hook 'python-mode-hook 'importmagic-mode)
 ;;(define-key importmagic-mode-map (kbd "C-c C-i") 'importmagic-fix-symbol-at-point)
 ;;(add-to-list 'helm-boring-buffer-regexp-list "\\*epc con")
-;; Python:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Redis][Redis:1]]
 ;; Commint for redis
 (use-package redis
   :defer t)
-;; Redis:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Ruby][Ruby:1]]
 (use-package ruby-mode
   :defer t)
 
 (use-package inf-ruby
   :hook (ruby-mode-hook . inf-ruby-minor-mode))
-;; Ruby:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Rust][Rust:1]]
 ;; You may need installing the following packages on your system:
 ;; * rustc (Rust Compiler)
 ;; * cargo (Rust Package Manager)
@@ -3457,17 +3170,13 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
     :commands racer-mode
     :hook (rust-mode . racer-mode)
     :config (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)))
-;; Rust:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Solidity%20(Ethereum)][Solidity (Ethereum):1]]
 (use-package solidity-mode
   :mode "\\.sol\\'"
   :init
   (setq solidity-flycheck-solc-checker-active t)
   (setq solidity-flycheck-solium-checker-active t))
-;; Solidity (Ethereum):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*SQL][SQL:1]]
 (use-package sql
   :mode (("\\.sql\\'" . sql-mode)
          ("\\.msql\\'" . sql-mode))  ; Mako template sql
@@ -3625,9 +3334,7 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
   (add-to-list 'sqlup-blacklist "name")
   (add-to-list 'sqlup-blacklist "names")
   (add-to-list 'sqlup-blacklist "type"))
-;; SQL:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Typescript][Typescript:3]]
 ;; TypeScript
 (use-package typescript-mode
   :init
@@ -3646,9 +3353,7 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
   ;;(add-hook 'before-save-hook 'tide-format-before-save)
   (setq tide-format-options '(:insertSpaceAfterFunctionKeywordForAnonymousFunctions t
                               :placeOpenBraceOnNewLineForFunctions nil)))
-;; Typescript:3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Web][Web:1]]
 (use-package emmet-mode
   :hook (web-mode sgml-mode css-mode)
   :bind (:map emmet-mode-keymap
@@ -3678,9 +3383,7 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
 
 (use-package sass-mode
   :mode ("\\.sass\\'"))
-;; Web:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Web][Web:2]]
 ;; FIXME: add flycheck support? Only for .vue files?
 ;; (flycheck-add-mode 'javascript-eslint 'web-mode)
 (use-package web-mode
@@ -3806,9 +3509,7 @@ $ autopep8 --in-place --aggressive --aggressive <filename>"
                   )
               (unless tide-mode (tide-mode))
             (if tide-mode (tide-mode -1)))))))
-;; Web:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*personal.el][personal.el:1]]
 (use-package discover-my-major
   :bind (("C-h C-m" . discover-my-major)))
 
@@ -4182,9 +3883,7 @@ displayed anywhere else."
   :defer 120
   :commands keychain-refresh-environment
   :config (keychain-refresh-environment))
-;; personal.el:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org][Org:1]]
 (use-package org
   :mode ("\\.org\\'"  . org-mode)
   :bind (("C-c a"   . org-agenda)
@@ -4538,9 +4237,7 @@ Show clock history when not in org buffer or when called with prefix argument."
     (interactive)
     (org-sort-entries nil ?f #'my/org-sort-key))
   )
-;; Org:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-agenda][Org-agenda:1]]
 (use-package org-agenda
   :defer t
   :config
@@ -4754,9 +4451,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
        (t (setq result nil)))
       result))
   )
-;; Org-agenda:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-babel][Org-babel:1]]
 (use-package ob
   :defer t
   :init
@@ -4927,9 +4622,7 @@ This function is called by `org-babel-execute-src-block'."
                    (->> result (assoc 'image/svg+xml) cdr (ob-ipython--write-string-to-file file)))
                   (file (error "%s is currently an unsupported file extension." (f-ext file)))
                   (t (->> result (assoc 'text/plain) cdr)))))))))
-;; Org-babel:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-src][Org-src:1]]
 (use-package org-src
   :defer t
   :init
@@ -4985,19 +4678,13 @@ NAME may be nil for unnamed sessions."
     "Major mode for editing web-mode django templates."
     (web-mode)
     (web-mode-set-engine "django")))
-;; Org-src:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-indent:%20Indent%20text%20according%20to%20outline%20structure.][Org-indent: Indent text according to outline structure.:1]]
 (use-package org-indent
   :hook (org-mode . org-indent-mode))
-;; Org-indent: Indent text according to outline structure.:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-bullets:%20Use%20utf-8%20characters%20instead%20of%20`*`%20as%20bullet%20points][Org-bullets: Use utf-8 characters instead of `*` as bullet points:1]]
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
-;; Org-bullets: Use utf-8 characters instead of `*` as bullet points:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-capture][Org-capture:1]]
 (use-package org-protocol :after org)
 ;; org-capture chrome plugin: https://chrome.google.com/webstore/detail/org-capture/kkkjlfejijcjgjllecmnejhogpbcigdc?hl=en
 
@@ -5064,9 +4751,7 @@ NAME may be nil for unnamed sessions."
 (use-package org-protocol-capture-html
   :disabled t  ; Usefule but never used since bookmarklet not configured yet
   :after org-capture)
-;; Org-capture:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-clock:][Org-clock::1]]
 ;;; Clock Setup
 (use-package org-clock
   :after org
@@ -5236,9 +4921,7 @@ as the default task."
   (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
   ;; Include current clocking task in clock reports
   (setq org-clock-report-include-clocking-task t))
-;; Org-clock::1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-crypt:%20Encrypt%20parts%20in%20org%20file%20tagged%20with%20~CRYPT~][Org-crypt: Encrypt parts in org file tagged with ~CRYPT~:1]]
 (use-package org-crypt
   :defer t
   :config
@@ -5249,9 +4932,7 @@ as the default task."
   (setq org-crypt-key "C1C8D63F884EF9C9")
   ;; don't ask to disable auto-save
   (setq org-crypt-disable-auto-save nil))
-;; Org-crypt: Encrypt parts in org file tagged with ~CRYPT~:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-export][Org-export:1]]
 (use-package ox
   :commands org-formatted-copy
   ;;:bind ("C-c e" . org-formatted-copy)
@@ -5307,35 +4988,25 @@ See `org-html-format-headline-function' for details."
 ;; reStructuredText
 (use-package ox-rst
   :after ox)
-;; Org-export:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-habit:%20Track%20habits][Org-habit: Track habits:1]]
 (use-package org-habit
   :after org)
-;; Org-habit: Track habits:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-man:%20Make%20org-links%20work%20with%20man%20pages][Org-man: Make org-links work with man pages:1]]
 (use-package org-man
   :after org
   :config
   (setq org-man-command 'woman))  ; open org-link man pages with woman
-;; Org-man: Make org-links work with man pages:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-expiry:%20Automatically%20add%20a%20CREATED%20property%20when%20inserting%20a%20new%20headline][Org-expiry: Automatically add a CREATED property when inserting a new headline:1]]
 (use-package org-expiry
   :after org
   :config
   (setq org-expiry-inactive-timestamps t)
   (org-expiry-insinuate))
-;; Org-expiry: Automatically add a CREATED property when inserting a new headline:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-id:%20Create%20ID%20property%20with%20new%20task][Org-id: Create ID property with new task:1]]
 (use-package org-id
   :after org
   :config (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id))
-;; Org-id: Create ID property with new task:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-table][Org-table:1]]
 (use-package org-table
   :after org
   :config
@@ -5384,9 +5055,7 @@ See `org-html-format-headline-function' for details."
    :map org-mode-map
    :filter (org-at-table-p)
    ("S-SPC" . hydra-org-table-mark-field/body)))
-;; Org-table:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-pomodoro][Org-pomodoro:1]]
 (use-package org-pomodoro
   :defer t
   :init
@@ -5405,9 +5074,7 @@ See `org-html-format-headline-function' for details."
   (setq org-pomodoro-keep-killed-pomodoro-time t)
   ;; Never clock-out automatically
   (setq org-pomodoro-clock-always t))
-;; Org-pomodoro:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-jira:%20Sync%20issues%20with%20Jira][Org-jira: Sync issues with Jira:1]]
 (use-package org-jira
   :defer t
   :config
@@ -5415,17 +5082,13 @@ See `org-html-format-headline-function' for details."
   ;; Don't sync anything back to jira
   (setq org-jira-deadline-duedate-sync-p nil)
   (setq org-jira-worklog-sync-p nil))
-;; Org-jira: Sync issues with Jira:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Org-github:%20Sync%20issues%20with%20GitHub][Org-github: Sync issues with GitHub:1]]
 (use-package org-github
   :defer t
   :config
   (setq org-github-default-owner "atomx")
   (setq org-github-default-name "api"))
-;; Org-github: Sync issues with GitHub:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Orgit:%20org-link%20support%20for%20magit%20buffers][Orgit: org-link support for magit buffers:1]]
 (use-package orgit
   ;; Automatically copy orgit link to last commit after commit
   :hook (git-commit-setup . orgit-store-after-commit)
@@ -5442,14 +5105,10 @@ See `org-html-format-headline-function' for details."
                        (desc (format "%s (%s)" summary repo)))
                   (push (list link desc) org-stored-links)))
               t t)))
-;; Orgit: org-link support for magit buffers:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Counsel-org-clock][Counsel-org-clock:1]]
 (use-package counsel-org-clock
   :defer t)
-;; Counsel-org-clock:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*bh.el%20TODO:%20remove???][bh.el TODO: remove???:1]]
 (defun bh/is-project-p ()
   "Any task with a todo keyword subtask"
   (save-restriction
@@ -5774,9 +5433,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 
 (defun bh/is-scheduled-late (date-str)
   (string-match "Sched\.\\(.*\\)x:" date-str))
-;; bh.el TODO: remove???:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Irc][Irc:1]]
 (use-package erc
   :config
   (setq erc-hide-list '("PART" "QUIT" "JOIN"))
@@ -5796,18 +5453,14 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 
 (use-package erc-hl-nicks
   :after erc)
-;; Irc:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Irc][Irc:2]]
 (use-package erc-services
   :after erc
   :config
   (setq erc-prompt-for-nickserv-password nil)
   (setq erc-nickserv-passwords
         `((freenode(("dakra" . ,(auth-source-pick-first-password :host erc-server :login erc-nick)))))))
-;; Irc:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Email][Email:2]]
 ;; mu package (includes mu4e) must be installed in the system
 (use-package mu4e
   ;; Open mu4e with the 'Mail' key (if your keyboard has one)
@@ -6383,9 +6036,7 @@ there are no attachments."
               ;; try to emulate some of the eww key-bindings
               (local-set-key (kbd "<tab>") 'shr-next-link)
               (local-set-key (kbd "<backtab>") 'shr-previous-link))))
-;; Email:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Exwm][Exwm:1]]
 (use-package xelb
   :if (daemonp))
 
@@ -6675,14 +6326,10 @@ no window below and `exwm-windmove-workspace-1-below-p' is non-NIL."
 
   ;; Enable EXWM
   (exwm-enable))
-;; Exwm:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Gpastel:%20gpaste%20clipboard%20manager%20synchronization%20with%20kill-ring][Gpastel: gpaste clipboard manager synchronization with kill-ring:1]]
 (use-package gpastel
   :hook (exwm-init . gpastel-start-listening))
-;; Gpastel: gpaste clipboard manager synchronization with kill-ring:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*PulseAudio][PulseAudio:1]]
 (use-package pulseaudio-control
   :bind (("<XF86AudioRaiseVolume>" . pulseaudio-control-increase-volume)
          ("<XF86AudioLowerVolume>" . pulseaudio-control-decrease-volume)
@@ -6706,18 +6353,14 @@ no window below and `exwm-windmove-workspace-1-below-p' is non-NIL."
     ("s" pulseaudio-control-select-sink-by-name "Select Sink")
     ("q" nil "quit"))
   (setq pulseaudio-control-volume-step "5%"))
-;; PulseAudio:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Xbacklight:%20Adjust%20screen%20brightness][Xbacklight: Adjust screen brightness:1]]
 (use-package xbacklight
   :bind (("<XF86MonBrightnessUp>" . xbacklight-increase)
          ("<XF86MonBrightnessDown>" . xbacklight-decrease)
          :map exwm-mode-map
          ("<XF86MonBrightnessUp>" . xbacklight-increase)
          ("<XF86MonBrightnessDown>" . xbacklight-decrease)))
-;; Xbacklight: Adjust screen brightness:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Network][Network:1]]
 (defvar counsel-network-manager-history nil
   "Network manager history.")
 
@@ -6737,9 +6380,7 @@ no window below and `exwm-windmove-workspace-1-below-p' is non-NIL."
                           (message "Connecting to \"%s\".." network)
                           (async-shell-command
                            (format "nmcli device wifi connect %s" (shell-quote-argument network))))))))
-;; Network:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Navigation][Navigation:1]]
 ;; Focus follows mouse for Emacs windows and frames
 (setq mouse-autoselect-window t)
 (setq focus-follows-mouse t)
@@ -6832,22 +6473,16 @@ It only works for frames with exactly two windows."
           (select-window first-win)
           (if this-win-2nd (other-window 1))))))
 (global-set-key (kbd "C-x C-\\") 'toggle-window-split)
-;; Navigation:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Switch%20window][Switch window:1]]
 (use-package switch-window
   :disabled t
   :commands switch-window
   :config (setq switch-window-input-style 'minibuffer))
-;; Switch window:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*winner-mode:%20undo/redo%20window%20configurations][winner-mode: undo/redo window configurations:1]]
 (use-package winner
   :defer 3
   :config (winner-mode 1))
-;; winner-mode: undo/redo window configurations:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Transmission:%20Bittorent][Transmission: Bittorent:1]]
 (use-package transmission
   :defer t
   :config
@@ -6856,17 +6491,13 @@ It only works for frames with exactly two windows."
                                      transmission-files-mode
                                      transmission-info-mode
                                      transmission-peers-mode)))
-;; Transmission: Bittorent:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Brain-fm:%20Stream%20music%20from%20brain.fm][Brain-fm: Stream music from brain.fm:1]]
 (use-package brain-fm
   :defer t
   :config
   ;; Station 35 is "Focus"
   (setq brain-fm-station-id 35))
-;; Brain-fm: Stream music from brain.fm:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Emms][Emms:1]]
 (use-package emms
   :defer t)
 
@@ -6875,9 +6506,7 @@ It only works for frames with exactly two windows."
   :config
   (setq emms-player-list '(emms-player-mpv))
   (setq emms-player-mpv-parameters '("--no-terminal" "--force-window=no" "--audio-display=no")))
-;; Emms:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*YouTube%20Download][YouTube Download:1]]
 (use-package youtube-dl
   :defer t
   :init
@@ -6885,40 +6514,28 @@ It only works for frames with exactly two windows."
   :config
   (setq youtube-dl-arguments
         '("--no-mtime" "--restrict-filenames" "--format" "best" "--mark-watched")))
-;; YouTube Download:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Image%20(magick)][Image (magick):1]]
 (use-package image :defer t
   :config
   ;; always loop GIF images
   (setq image-animate-loop t))
-;; Image (magick):1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Image%20(magick)][Image (magick):2]]
 (use-package eimp
   :hook (image-mode . eimp-mode))
-;; Image (magick):2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Image%20(magick)][Image (magick):3]]
 (use-package blimp
   :hook (image-mode . blimp-mode))
-;; Image (magick):3 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Atomx][Atomx:1]]
 (use-package atomx
   :defer t)
-;; Atomx:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Gif-Screencasts:%20One-frame-per-action%20GIF%20recording][Gif-Screencasts: One-frame-per-action GIF recording:1]]
 (use-package gif-screencast
   :bind (:map gif-screencast-mode-map
          ("<f11>" . gif-screencast-toggle-pause)
          ("<f12>" . gif-screencast-stop)
          ("<escape>" . gif-screencast-stop))
   :config (setq gif-screencast-output-directory (expand-file-name "videos/emacs/" "~")))
-;; Gif-Screencasts: One-frame-per-action GIF recording:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Systemctl][Systemctl:1]]
 (use-package systemctl
   :commands hydra-systemctl/body
   :config
@@ -6962,17 +6579,13 @@ _g_: Refresh Hydra  _q_: quit"
 
     ("g" (message "Hydra refreshed"))
     ("q" (message "Abort") :exit t)))
-;; Systemctl:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*OVPN:%20OpenVPN%20management%20mode][OVPN: OpenVPN management mode:1]]
 (use-package ovpn-mode
   :defer t
   :config
   (setq ovpn-mode-ipv6-auto-toggle t)  ; Always turn off ipv6 when starting vpn
   (setq ovpn-mode-base-directory "~/vpn"))
-;; OVPN: OpenVPN management mode:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Ledger:%20Accounting][Ledger: Accounting:1]]
 ;; ledger-mode for bookkeeping
 (defun ledger-mode-outline-hook ()
   (outline-minor-mode)
@@ -7040,9 +6653,7 @@ _g_: Refresh Hydra  _q_: quit"
 
 (use-package flycheck-ledger
   :after (flycheck ledger-mode))
-;; Ledger: Accounting:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Elfeed:%20Atomx/RSS%20news%20reader][Elfeed: Atomx/RSS news reader:1]]
 (use-package elfeed
   :defer t
   :bind (:map elfeed-show-mode-map
@@ -7335,19 +6946,13 @@ readable website content if the entry url matches `elfeed-readability-url-regex'
     ("cgpgrey" youtube education)
     ("ufc" youtube mma)
     ("MMAFightingonSBN" youtube mma)))
-;; Elfeed: Atomx/RSS news reader:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Info-beamer][Info-beamer:1]]
 (use-package info-beamer
   :hook (lua-mode . info-beamer-mode))
-;; Info-beamer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Nov:%20Read%20EPUBs][Nov: Read EPUBs:1]]
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode))
-;; Nov: Read EPUBs:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Pocket%20reader][Pocket reader:1]]
 ;; Read and manage your pocket (getpocket.com) list
 (use-package pocket-reader
   :defer t)
@@ -7357,15 +6962,11 @@ readable website content if the entry url matches `elfeed-readability-url-regex'
 (use-package org-pocket
   :after (pocket-reader org)
   :config (setq org-pocket-capture-file "org/pocket.org"))
-;; Pocket reader:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eww][Eww:1]]
 ;; Use 'C-c S' or 'M-s M-w' for 'eww-search-words' current region
 ;;(define-key prelude-mode-map (kbd "C-c S") nil)  ; remove default crux find-shell-init keybinding
 (global-set-key (kbd "C-c S") 'eww-search-words)
-;; Eww:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Eww][Eww:2]]
 (use-package browse-url
   :bind (("C-c u" . browse-url-at-point))
   :init
@@ -7385,22 +6986,16 @@ readable website content if the entry url matches `elfeed-readability-url-regex'
 (use-package eww
   :defer t
   :config (setq eww-search-prefix "https://google.com/search?q="))
-;; Eww:2 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Wolfram%20alpha][Wolfram alpha:1]]
 ;; wolfram alpha queries (M-x wolfram-alpha)
 (use-package wolfram
   :defer t
   :config
   (setq wolfram-alpha-app-id "KTKV36-2LRW2LELV8"))
-;; Wolfram alpha:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Tea%20timer][Tea timer:1]]
 (use-package tea-timer
   :defer t)
-;; Tea timer:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Web%20Server:%20A%20web%20server%20running%20handlers%20written%20in%20Emacs%20Lisp][Web Server: A web server running handlers written in Emacs Lisp:1]]
 (use-package web-server
   :config
   (defvar web-server-file-server nil
@@ -7456,15 +7051,11 @@ associated with the current buffer's file."
           (setq global-mode-string web-server-old-global-mode-string)
           (message "File server stopped."))
       (message "No file server is running."))))
-;; Web Server: A web server running handlers written in Emacs Lisp:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Debug%20emacs%20init%20startup%20time][Debug emacs init startup time:1]]
 (use-package esup
   :defer t
   :config (setq esup-user-init-file "~/.emacs.d/emacs.el"))
-;; Debug emacs init startup time:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Unsortet%20stuff%20in%20no%20packages][Unsortet stuff in no packages:1]]
 (defun borg-sync-drone-urls ()
   "Offer to update outdated upstream urls of all drones."
   (interactive)
@@ -7486,9 +7077,7 @@ associated with the current buffer's file."
           (process-file "git" nil nil nil "config" "-f" ".gitmodules"
                         (format "submodule.%s.url" drone) b))
         (process-file "git" nil nil nil "submodule" "sync")))))
-;; Unsortet stuff in no packages:1 ends here
 
-;; [[file:~/stow/pub_dotfiles/emacs/dot-emacs.d/misc/ntangle/tests/dmacs/init.org::*Post%20Initialization][Post Initialization:1]]
 (message "Loading %s...done (%.3fs)" user-init-file
          (float-time (time-subtract (current-time)
                                     before-user-init-time)))
@@ -7503,4 +7092,3 @@ associated with the current buffer's file."
             ;; Let's lower our GC thresholds back down to a sane level.
             (setq gc-cons-threshold (* 20 1024 1024)))
           t)
-;; Post Initialization:1 ends here
