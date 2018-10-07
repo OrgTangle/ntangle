@@ -1,0 +1,38 @@
+#+property: header-args :tangle yes
+
+At Org level 0.
+
+* Heading 1
+:PROPERTIES:
+:header-args: :tangle foo.el
+:END:
+At Org level 1.
+#+name: block1
+#+begin_src emacs-lisp
+(message "this will be tangled to foo.el")
+#+end_src
+** Heading 1.1
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+At Org level 2.
+
+Only the emacs-lisp block will *not* be tangled from this subtree.
+#+name: block2
+#+begin_src emacs-lisp
+(message "this block will *not* be tangled")
+#+end_src
+
+But the below Nim block will tangle fine (though incorrectly to the
+foo.el file!).
+#+name: block3
+#+begin_src nim
+echo "this block will be tangled to foo.el too!"
+#+end_src
+
+- Note :: ~ntangle~ creates /block3/ *below* /block1/ in the tangled
+          ~foo.el~, while ~org-bable-tangle~ reverses that order. It's
+          not clear why that's the case with ~org-babel-tangle~ if
+          /block3/ is appearing *after* /block1/ in this Org
+          file. Assuming that that's a bug in Org mode, ~ntangle~ is
+          not copying that behavior right now. <2018-10-07 Sun>

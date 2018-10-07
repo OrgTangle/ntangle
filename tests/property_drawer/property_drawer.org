@@ -1,0 +1,60 @@
+#+property: header-args :tangle yes
+
+At Org level 0.
+
+#+begin_src nim
+echo "this will be tangled to property_drawer.nim"
+#+end_src
+
+#+begin_src nim :tangle no
+echo "this block won't get tangled"
+#+end_src
+
+* Heading 1
+:PROPERTIES:
+:HEADER-ARGS: :tangle no
+:END:
+Below block will also *not* be tangled. This subtree also tests the
+~header-args~ property in all-caps.
+#+begin_src nim
+echo "hello"
+#+end_src
+** Heading 1.1
+Now at Org level 2.
+#+begin_src nim :tangle specified_file.nim
+echo "this will be tangled to specified_file.nim"
+#+end_src
+* Heading 2
+:PROPERTIES:
+:header-args: :tangle foo/bar.el
+:header-args+: :mkdirp yes
+:END:
+Back at Org level 1.
+#+begin_src emacs-lisp
+(message "this will be tangled to foo/bar.el")
+#+end_src
+** Heading 2.1
+:PROPERTIES:
+:header-args:nim: :tangle no
+:END:
+Now again at Org level 2.
+
+Only the nim blocks will *not* be tangled from this subtree.
+#+begin_src nim
+echo "this will *not* be tangled"
+#+end_src
+
+But the below block will tangle fine.
+#+begin_src emacs-lisp
+(message "second line tangled to foo/bar.el")
+#+end_src
+*** Heading 2.1.1
+:PROPERTIES:
+:header-args:nim: :tangle yes
+:END:
+Now at Org level 3.
+
+Below nim block will be tangled.
+#+begin_src nim
+echo "this will the second block tangled to property_drawer.nim"
+#+end_src
