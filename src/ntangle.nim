@@ -225,20 +225,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     #   # use argval
     # of "noweb-sep":
     #   # use argval
-    of "exports", "results":  #Ignore args not relevant to tangling
-      discard
-    else:
+    of "comments", "no-expand", "noweb", "noweb-ref", "noweb-sep":
       styledEcho(fgYellow, "  [WARN] ",
                  fgDefault, "Line ",
                  styleBright, $lnum,
                  resetStyle, fmt" - ':{arg}' header argument is not supported at the moment.")
+    else:                       # Ignore all other header args
       discard
-    # of "":
-    #   case argval
-    #   of "yes":
-    #   of "no":
-    #   else:
-    #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
 
     # Update the default HeaderArgs for the current orgLevel+lang
     # scope.
