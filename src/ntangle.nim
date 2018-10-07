@@ -35,10 +35,11 @@ dbg "{tangledExt}"
 
 type
   HeaderArgType = enum
-    haPropertyKwd
-    haPropertyDrawer
-    haBeginSrc
-    haNone
+    haPropertyKwd            # #+property: header-args ..
+    haPropertyDrawer         # :header-args: ..
+    haPropertyDrawerAppend   # :header-args+: ..
+    haBeginSrc               # #+begin_src foo ..
+    haNone                   # none of the above
   UserError = object of Exception
   OrgError = object of Exception
   HeaderArgs = object
@@ -373,9 +374,13 @@ proc getHeaderArgs(s: string): LangAndArgs =
     headerArgsRaw = spaceSepParts[1 .. spaceSepParts.high]
     let
       kwdParts = spaceSepParts[0].split(":")
+    doAssert kwdParts.len >= 3
     if kwdParts.len == 4:
       lang = kwdParts[2].strip(chars = {' ', '+'})
-    haType = haPropertyDrawer
+    if kwdParts[1].strip().endsWith("+"):
+      haType = haPropertyDrawerAppend
+    else:
+      haType = haPropertyDrawer
   elif spaceSepParts.len >= 2 and
        spaceSepParts[0].toLowerAscii() == "#+begin_src":
     if spaceSepParts.len >= 3:
