@@ -511,8 +511,18 @@ proc doOrgTangle(file: string) =
     writeFiles()
     echo ""
 
-proc ntangle(orgFilesOrDirs: seq[string]) =
+proc echoVersion() =
+  ## Echo the version string.
+  const
+    versionString = staticExec("git describe --tags HEAD")
+  echo fmt"ntangle {version_string}"
+
+proc ntangle(orgFilesOrDirs: seq[string], version = false) =
   ## Command-line utility for Tangling of Org mode documents
+  if version:
+    echoVersion()
+    quit QuitSuccess
+
   startTime = cpuTime()
   try:
     for f1 in orgFilesOrDirs:
@@ -532,18 +542,19 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
   except:
     stderr.styledWriteLine(fgRed, fmt"  [ERROR] {getCurrentException().name}: ",
                            fgDefault, getCurrentExceptionMsg() & "\n")
-    quit 1
+    quit QuitFailure
 
 when isMainModule:
   import cligen
   const
     url = "https://github.com/OrgTangle/ntangle"
   dispatchGen(ntangle
-              , usage="\nNAME\n  ntangle - $doc\n" &
+              , usage = "\nNAME\n  ntangle - $doc\n" &
                 "USAGE\n  $command $args\n\n" &
                 "OPTIONS\n$options\n" &
                 "URL\n  " & url & "\n"
-              , version = ("version", "0.6.1"))
+              , help = { "version": "write the version to stdout" }
+  )
   if paramCount()==0:
     quit(dispatch_ntangle(@["--help"]))
   else:
