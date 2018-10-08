@@ -6,8 +6,9 @@ import os, strformat, strutils, tables, terminal, sequtils, times
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
 
-# const DebugVerbosityLevel = dvLow
-const DebugVerbosityLevel = dvNone
+const
+  # DebugVerbosityLevel = dvLow
+  DebugVerbosityLevel = dvNone
 template dbg(msg: string, verbosity = dvLow, prefix = "[DBG] ") =
   when DebugVerbosityLevel >= dvLow:
     case DebugVerbosityLevel
@@ -21,15 +22,15 @@ template dbg(msg: string, verbosity = dvLow, prefix = "[DBG] ") =
 
 const
   tangledExt = {
-    "emacs-lisp" : "el",
-    "shell" : "sh",
-    "bash" : "sh",
-    "tcsh" : "csh",
-    "rust" : "rs",
-    "python" : "py",
-    "python3" : "py",
-    "ipython" : "py",
-    "ipython3" : "py"
+    "emacs-lisp": "el",
+    "shell": "sh",
+    "bash": "sh",
+    "tcsh": "csh",
+    "rust": "rs",
+    "python": "py",
+    "python3": "py",
+    "ipython": "py",
+    "ipython3": "py"
   }.toTable
 dbg "{tangledExt}"
 
@@ -84,30 +85,28 @@ proc resetStateVars() =
   fileHeaderArgs.clear()
   headerArgsDefaults.clear()
   # Default tangle header args for all Org levels and languages.
-  headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
-                                                   padline : true,
-                                                   shebang : "",
-                                                   mkdirp : false,
-                                                   permissions : {})
+  headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle: "no",
+                                                   padline: true,
+                                                   shebang: "",
+                                                   mkdirp: false,
+                                                   permissions: {})
 
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
   # https://devdocs.io/nim/os#FilePermission
-  var perm: set[FilePermission]
   let
-    readPerms = @[fpUserRead, fpGroupRead, fpOthersRead]
-    writePerms = @[fpUserWrite, fpGroupWrite, fpOthersWrite]
-    execPerms = @[fpUserExec, fpGroupExec, fpOthersExec]
+    readPerms = [fpUserRead, fpGroupRead, fpOthersRead]
+    writePerms = [fpUserWrite, fpGroupWrite, fpOthersWrite]
+    execPerms = [fpUserExec, fpGroupExec, fpOthersExec]
   for idx, o in octals:
     if o != '0':
       if o in {'4', '5', '6', '7'}:
-        perm = perm + {readPerms[idx]}
+        result = result + {readPerms[idx]}
       if o in {'2', '3', '6', '7'}:
-        perm = perm + {writePerms[idx]}
+        result = result + {writePerms[idx]}
       if o in {'1', '3', '5', '7'}:
-        perm = perm + {execPerms[idx]}
-  dbg "permissions = {perm}"
-  result = perm
+        result = result + {execPerms[idx]}
+  dbg "permissions = {result}"
 
 proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
   ## Org header arguments related to tangling. See (org) Extracting Source Code.
@@ -180,7 +179,8 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
       else:
         raise newException(OrgError, fmt("The '{argval}' value for ':{argkey}' is invalid. The only valid values are 'yes' and 'no'."))
     of "tangle-mode":
-      let octalPerm = argval.split("#o", maxsplit=1)
+      let
+        octalPerm = argval.split("#o", maxsplit=1)
       if octalPerm.len != 2:
         raise newException(OrgError, fmt("Line {lnum} - The header argkey ':{argkey}' has invalid file permissions syntax: {argval}"))
       if octalPerm[1].len < 3:
@@ -282,10 +282,11 @@ proc lineAdjust(line: string, indent: int): string =
   result =
     if indent == 0:
       line & "\n"
-    elif line.len <= 2 :
+    elif line.len <= 2:
       line & "\n"
     else:
-      var truncSafe = true
+      var
+        truncSafe = true
       for i, c in line[0 ..< indent]:
         dbg "line[{i}] = {c}"
         if c != ' ': # Don't truncate if the to-be-truncated portion is not all spaces
@@ -499,7 +500,8 @@ proc doOrgTangle(file: string) =
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
     resetStateVars()
     styledEcho("Parsing ", styleBright, file, resetStyle, " ..")
-    var lnum = 1
+    var
+      lnum = 1
     for line in lines(file):
       dbg("", prefix=" ")           # blank line
       dbg "{lnum}: {line}", dvHigh
