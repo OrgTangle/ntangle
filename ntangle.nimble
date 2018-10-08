@@ -5,7 +5,6 @@ author        = "Kaushal Modi"
 description   = "Command-line utility for Tangling of Org mode documents"
 license       = "MIT"
 srcDir        = "src"
-skipFiles     = @["ntangle_nodbg.nim"]
 bin           = @["ntangle"]
 
 # Dependencies
