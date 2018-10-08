@@ -909,7 +909,6 @@ different face
 ;; Hook for when a frame is created with emacsclient
 ;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
 (add-hook 'after-make-frame-functions '--set-emoji-font)
-
 #+END_SRC
 ** Automatically remove trailing whitespace (only if I put them there)
 #+BEGIN_SRC emacs-lisp
@@ -2109,7 +2108,7 @@ go up multiple parent directories."
 #+END_SRC
 * Helm
 #+BEGIN_SRC emacs-lisp
-  ;;; Helm config
+;;; Helm config
 (use-package helm
   :disabled t
   :commands (helm-M-x helm-mini helm-imenu helm-resume helm-execute-persistent-action helm-select-action)

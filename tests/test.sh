@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-10-07 03:11:44 kmodi>
+# Time-stamp: <2018-10-07 23:27:20 kmodi>
 
 set -euo pipefail # http://redsymbol.net/articles/unofficial-bash-strict-mode
 IFS=$'\n\t'
@@ -16,6 +16,7 @@ run_test () {
     "${bin}" tests/org_tangle_rs/
     "${bin}" tests/nested_src/
     "${bin}" tests/property_drawer/
+    "${bin}" tests/dmacs/
 
     "${bin}" tests/missing_arg_value/missing_arg_value.org || true
     "${bin}" tests/invalid_arg_no_colon/ || true
