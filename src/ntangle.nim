@@ -1,7 +1,7 @@
 # NTangle - Basic tangling of Org documents
 # https://github.com/OrgTangle/ntangle
 
-import os, strformat, strutils, tables, terminal, sequtils
+import os, strformat, strutils, tables, terminal, sequtils, times
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
@@ -69,6 +69,7 @@ var
   bufEnabled: bool
   firstLineSrcBlock = false
   blockIndent = 0
+  startTime: float
 
 proc resetStateVars() =
   ## Reset all the state variables.
@@ -494,6 +495,9 @@ proc writeFiles() =
       # permissions (as Org does too).
       file.inclFilePermissions({fpUserExec})
 
+  echo ""
+  styledEcho("Total tangling time: ", fgGreen, fmt"{(cpuTime() - startTime):.2f}", fgDefault, " seconds")
+
 proc doOrgTangle(file: string) =
   ## Tangle Org file ``file``.
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
@@ -510,6 +514,7 @@ proc doOrgTangle(file: string) =
 
 proc ntangle(orgFilesOrDirs: seq[string]) =
   ## Main
+  startTime = cpuTime()
   try:
     for f1 in orgFilesOrDirs:
       let
