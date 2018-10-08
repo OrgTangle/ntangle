@@ -94,18 +94,18 @@ proc resetStateVars() =
 proc parseFilePermissions(octals: string): set[FilePermission] =
   ## Converts the input permissions octal string to a Nim set for FilePermission type.
   # https://devdocs.io/nim/os#FilePermission
-  let
+  const
     readPerms = [fpUserRead, fpGroupRead, fpOthersRead]
     writePerms = [fpUserWrite, fpGroupWrite, fpOthersWrite]
     execPerms = [fpUserExec, fpGroupExec, fpOthersExec]
   for idx, o in octals:
     if o != '0':
       if o in {'4', '5', '6', '7'}:
-        result = result + {readPerms[idx]}
+        result.incl(readPerms[idx])
       if o in {'2', '3', '6', '7'}:
-        result = result + {writePerms[idx]}
+        result.incl(writePerms[idx])
       if o in {'1', '3', '5', '7'}:
-        result = result + {execPerms[idx]}
+        result.incl(execPerms[idx])
   dbg "permissions = {result}"
 
 proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
