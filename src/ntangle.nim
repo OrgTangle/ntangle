@@ -113,7 +113,6 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
   let
     (dir, basename, _) = splitFile(file)
   dbg "Org file = {file}, dir={dir}, base name={basename}", dvHigh
-  dbg("", prefix=" ")           # blank line
   dbg "Line {lnum}, Lang {haObj.lang} - hdrArgs: {haObj.args}"
   var
     hArgs: HeaderArgs
@@ -148,7 +147,7 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
       hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
       argkey = hdrArgParts[0]
       argval = hdrArgParts[1]
-    dbg "argkey={argkey}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+    dbg "argkey={argkey}, argval={argval}, onBeginSrc={haObj.argType == haBeginSrc}, outfile={outfile}"
     case argkey
     of "tangle":
       hArgs.tangle = argval
@@ -243,7 +242,7 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
     # value.
     outFileName = outfile
 
-    dbg "line={lnum}, onBeginSrc={onBeginSrc}, hArgs.tangle={hArgs.tangle} outfile={outfile} | outFileName={outFileName}"
+    dbg "line={lnum}, onBeginSrc={haObj.argType == haBeginSrc}, hArgs.tangle={hArgs.tangle}, outFileName={outFileName}"
     if haObj.argType == haBeginSrc:
       if hArgs.tangle != "no":
         doAssert outFileName != ""
@@ -438,6 +437,7 @@ proc parseLine(file: string, line: string, lnum: int) =
       dbg "  first line of src block"
     dbg "line {lnum}: bufEnabled: {bufEnabled} linePartsLower: {linePartsLower}", dvHigh
     if bufEnabled:
+      assert outFileName != ""
       if (linePartsLower[0] == "#+end_src"):
         bufEnabled = false
         dbg "line {lnum}: buffering disabled for `{outFileName}'"
@@ -450,7 +450,6 @@ proc parseLine(file: string, line: string, lnum: int) =
           blockIndent = (line.len - line.strip(trailing=false).len)
 
         try:
-          assert outFileName != ""
           if firstLineSrcBlock and fileHeaderArgs[outFileName].padline:
             fileData[outFileName].add("\n")
           fileData[outFileName].add(lineAdjust(line, blockIndent))
@@ -502,6 +501,7 @@ proc doOrgTangle(file: string) =
     styledEcho("Parsing ", styleBright, file, resetStyle, " ..")
     var lnum = 1
     for line in lines(file):
+      dbg("", prefix=" ")           # blank line
       dbg "{lnum}: {line}", dvHigh
       parseLine(file, line, lnum)
       inc lnum
