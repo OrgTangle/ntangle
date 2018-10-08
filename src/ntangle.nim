@@ -512,7 +512,7 @@ proc doOrgTangle(file: string) =
     echo ""
 
 proc ntangle(orgFilesOrDirs: seq[string]) =
-  ## Main
+  ## Command-line utility for Tangling of Org mode documents
   startTime = cpuTime()
   try:
     for f1 in orgFilesOrDirs:
@@ -536,7 +536,13 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
 
 when isMainModule:
   import cligen
+  const
+    url = "https://github.com/OrgTangle/ntangle"
   dispatchGen(ntangle
+              , usage="\nNAME\n  ntangle - $doc\n" &
+                "USAGE\n  $command $args\n\n" &
+                "OPTIONS\n$options\n" &
+                "URL\n  " & url & "\n"
               , version = ("version", "0.6.1"))
   if paramCount()==0:
     quit(dispatch_ntangle(@["--help"]))
