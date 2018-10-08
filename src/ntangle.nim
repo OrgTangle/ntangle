@@ -60,7 +60,6 @@ type
 func initTangleHeaderArgs(): TangleHeaderArgs = initTable[LevelLangIndex, HeaderArgs]()
 
 var
-  orgFile: string
   prevOrgLevel = -1
   orgLevel = 0.Natural
   fileData = initTable[string, string]() # file, data
@@ -74,7 +73,6 @@ var
 proc resetStateVars() =
   ## Reset all the state variables.
   ## This is called before reading each new Org file.
-  orgFile = ""
   prevOrgLevel = -1
   orgLevel = 0.Natural
   outFileName = ""
@@ -110,29 +108,28 @@ proc parseFilePermissions(octals: string): set[FilePermission] =
   dbg "permissions = {perm}"
   result = perm
 
-proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, onBeginSrc: bool) =
+proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
   ## Org header arguments related to tangling. See (org) Extracting Source Code.
-  ## ``hdrArgs`` is a sequence like @["KEY1 VAL1", "KEY2 VAL2", ..].
   let
-    (dir, basename, _) = splitFile(orgFile)
-  dbg "Org file = {orgFile}, dir={dir}, base name={basename}", dvHigh
+    (dir, basename, _) = splitFile(file)
+  dbg "Org file = {file}, dir={dir}, base name={basename}", dvHigh
   dbg("", prefix=" ")           # blank line
-  dbg "Line {lnum}, Lang {lang} - hdrArgs: {hdrArgs}"
+  dbg "Line {lnum}, Lang {haObj.lang} - hdrArgs: {haObj.args}"
   var
     hArgs: HeaderArgs
     outfile = ""
-  if lang != "":
+  if haObj.lang != "":
     let
-      langLower = lang.toLowerAscii()
+      langLower = haObj.lang.toLowerAscii()
       ext = if tangledExt.hasKey(langLower):
               tangledExt[langLower]
             else:
-              lang
+              haObj.lang
     outfile = dir / basename & "." & ext
 
-  if headerArgsDefaults.hasKey((orgLevel, lang)):
-    hArgs = headerArgsDefaults[(orgLevel, lang)]
-    dbg "Line {lnum} - Using Org level {orgLevel} + lang {lang} scope, now hArgs = {hArgs}"
+  if headerArgsDefaults.hasKey((orgLevel, haObj.lang)):
+    hArgs = headerArgsDefaults[(orgLevel, haObj.lang)]
+    dbg "Line {lnum} - Using Org level {orgLevel} + lang {haObj.lang} scope, now hArgs = {hArgs}"
   else:
     hArgs = headerArgsDefaults[(orgLevel, "")]
     dbg "Line {lnum} - Using only Org level {orgLevel} scope, now hArgs = {hArgs}"
@@ -146,13 +143,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     else:
       outfile = hArgs.tangle
 
-  for hdrArg in hdrArgs:
+  for hdrArg in haObj.args:
     let
       hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
-      arg = hdrArgParts[0]
+      argkey = hdrArgParts[0]
       argval = hdrArgParts[1]
-    dbg "arg={arg}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
-    case arg
+    dbg "argkey={argkey}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
+    case argkey
     of "tangle":
       hArgs.tangle = argval
       case argval
@@ -171,7 +168,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
       of "no":
         hArgs.padline = false
       else:
-        raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        raise newException(OrgError, fmt("The '{argval}' value for ':{argkey}' is invalid. The only valid values are 'yes' and 'no'."))
     of "shebang":
       hArgs.shebang = argval
     of "mkdirp":
@@ -181,13 +178,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
       of "no":
         hArgs.mkdirp = false
       else:
-        raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+        raise newException(OrgError, fmt("The '{argval}' value for ':{argkey}' is invalid. The only valid values are 'yes' and 'no'."))
     of "tangle-mode":
       let octalPerm = argval.split("#o", maxsplit=1)
       if octalPerm.len != 2:
-        raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+        raise newException(OrgError, fmt("Line {lnum} - The header argkey ':{argkey}' has invalid file permissions syntax: {argval}"))
       if octalPerm[1].len < 3:
-        raise newException(OrgError, fmt("Line {lnum} - The header arg ':{arg}' has invalid file permissions syntax: {argval}"))
+        raise newException(OrgError, fmt("Line {lnum} - The header argkey ':{argkey}' has invalid file permissions syntax: {argval}"))
       let
         octalPermOwner = octalPerm[1][0]
         octalPermGroup = octalPerm[1][1]
@@ -210,7 +207,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     #   of "no":
     #     hArgs.no-expand = false
     #   else:
-    #     raise newException(OrgError, fmt("The '{argval}' value for ':{arg}' is invalid. The only valid values are 'yes' and 'no'."))
+    #     raise newException(OrgError, fmt("The '{argval}' value for ':{argkey}' is invalid. The only valid values are 'yes' and 'no'."))
     # of "noweb":
     #   case argval
     #   of "yes":
@@ -229,16 +226,16 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
       styledEcho(fgYellow, "  [WARN] ",
                  fgDefault, "Line ",
                  styleBright, $lnum,
-                 resetStyle, fmt" - ':{arg}' header argument is not supported at the moment.")
+                 resetStyle, fmt" - ':{argkey}' header argument is not supported at the moment.")
     else:                       # Ignore all other header args
       discard
 
   # Update the default HeaderArgs for the current orgLevel+lang
   # scope, but only using the header args set using property keyword
   # or the drawer property.
-  if (not onBeginSrc):
-    dbg "** Line {lnum}: Updating headerArgsDefaults[({orgLevel}, {lang})] to {hArgs}"
-    headerArgsDefaults[(orgLevel, lang)] = hArgs
+  if haObj.argType != haBeginSrc:
+    dbg "** Line {lnum}: Updating headerArgsDefaults[({orgLevel}, {haObj.lang})] to {hArgs}"
+    headerArgsDefaults[(orgLevel, haObj.lang)] = hArgs
 
   dbg "[after] Line {lnum} - hArgs = {hArgs}"
   if outfile != "":
@@ -247,7 +244,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     outFileName = outfile
 
     dbg "line={lnum}, onBeginSrc={onBeginSrc}, hArgs.tangle={hArgs.tangle} outfile={outfile} | outFileName={outFileName}"
-    if onBeginSrc:
+    if haObj.argType == haBeginSrc:
       if hArgs.tangle != "no":
         doAssert outFileName != ""
         dbg "line {lnum}: buffering enabled for `{outFileName}'"
@@ -337,7 +334,7 @@ proc updateHeaderArgsDefault() =
     discard
   prevOrgLevel = orgLevel
 
-proc getHeaderArgs(line: string, lnum: int): LangAndArgs =
+proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
   ## Get well-formatted header args.
   ##
   ## Examples:
@@ -369,7 +366,7 @@ proc getHeaderArgs(line: string, lnum: int): LangAndArgs =
      spaceSepParts[0].toLowerAscii() == "#+property:" and
      spaceSepParts[1].toLowerAscii().startsWith("header-args"):
     doAssert spaceSepParts[2][0] == ':',
-     fmt"{orgFile}:{lnum} :: {line}" & "\n" &
+     fmt"{file}:{lnum} :: {line}" & "\n" &
        "  : The first switch in 'header-args' property must be a key with ':' prefix."
     headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     let
@@ -381,7 +378,7 @@ proc getHeaderArgs(line: string, lnum: int): LangAndArgs =
   elif spaceSepParts.len >= 3 and
        spaceSepParts[0].toLowerAscii().startsWith(":header-args"):
     doAssert spaceSepParts[1][0] == ':',
-     fmt"{orgFile}:{lnum} :: {line}" & "\n" &
+     fmt"{file}:{lnum} :: {line}" & "\n" &
        "  : The first switch in 'header-args' drawer property must be a key with ':' prefix."
     headerArgsRaw = spaceSepParts[1 .. spaceSepParts.high]
     let
@@ -417,7 +414,7 @@ proc getHeaderArgs(line: string, lnum: int): LangAndArgs =
           headerArgs.add(headerArgPair)
   return (haType, lang, headerArgs)
 
-proc lineAction(line: string, lnum: int) =
+proc parseLine(file: string, line: string, lnum: int) =
   ## On detection of "#+begin_src" with ":tangle foo", enable
   ## recording of LINE, next line onwards to global table ``fileData``.
   ## On detection of "#+end_src", stop that recording.
@@ -426,13 +423,13 @@ proc lineAction(line: string, lnum: int) =
     dbg "orgLevel = {orgLevel}"
     updateHeaderArgsDefault()
   let
-    (haType, haLang, haArgs) = getHeaderArgs(line, lnum)
+    haObj = getHeaderArgs(file, line, lnum)
   dbg "[line {lnum}] {line}", dvHigh
-  if haType != haNone:
-    dbg "getHeaderArgs: line {lnum}:: {haType}, {haLang}, {haArgs}"
-  if haType in {haPropertyKwd, haPropertyDrawer, haPropertyDrawerAppend}:
-    dbg "Property header-args found [Lang={haLang}]: {haArgs}"
-    parseTangleHeaderProperties(haArgs, lnum, haLang, false)
+  if haObj.argType != haNone:
+    dbg "getHeaderArgs: line {lnum}:: {haObj}"
+  if haObj.argType in {haPropertyKwd, haPropertyDrawer, haPropertyDrawerAppend}:
+    dbg "Property header-args found [Lang={haObj.lang}]: {haObj.args}"
+    parseTangleHeaderProperties(file, lnum, haObj)
   else:
     let
       lineParts = line.strip.split(":")
@@ -461,8 +458,8 @@ proc lineAction(line: string, lnum: int) =
           fileData[outFileName] = lineAdjust(line, blockIndent)
         dbg "  extra indentation: {blockIndent}"
         firstLineSrcBlock = false
-    elif haType == haBeginSrc:
-      parseTangleHeaderProperties(haArgs, lnum, haLang, true)
+    elif haObj.argType == haBeginSrc:
+      parseTangleHeaderProperties(file, lnum, haObj)
 
 proc writeFiles() =
   ## Write the files from ``fileData``.
@@ -502,12 +499,11 @@ proc doOrgTangle(file: string) =
   ## Tangle Org file ``file``.
   if file.toLowerAscii.endsWith(".org"): # Ignore files with names not ending in ".org"
     resetStateVars()
-    orgFile = file
-    styledEcho("Parsing ", styleBright, orgFile, resetStyle, " ..")
+    styledEcho("Parsing ", styleBright, file, resetStyle, " ..")
     var lnum = 1
-    for line in lines(orgFile):
+    for line in lines(file):
       dbg "{lnum}: {line}", dvHigh
-      lineAction(line, lnum)
+      parseLine(file, line, lnum)
       inc lnum
     writeFiles()
     echo ""
