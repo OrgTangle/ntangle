@@ -1,7 +1,7 @@
 # NTangle - Basic tangling of Org documents
 # https://github.com/OrgTangle/ntangle
 
-import os, strformat, strutils, tables, terminal, sequtils, options
+import os, strformat, strutils, tables, terminal, sequtils
 
 type
   DebugVerbosity = enum dvNone, dvLow, dvHigh
@@ -43,7 +43,7 @@ type
   UserError = object of Exception
   OrgError = object of Exception
   HeaderArgs = object
-    tangle: Option[string]
+    tangle: string
     padline: bool
     shebang: string
     mkdirp: bool
@@ -85,7 +85,7 @@ proc resetStateVars() =
   fileHeaderArgs.clear()
   headerArgsDefaults.clear()
   # Default tangle header args for all Org levels and languages.
-  headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : some("no"),
+  headerArgsDefaults[(0.Natural, "")] = HeaderArgs(tangle : "no",
                                                    padline : true,
                                                    shebang : "",
                                                    mkdirp : false,
@@ -130,17 +130,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
               lang
     outfile = dir / basename & "." & ext
 
-  if fileHeaderArgs.hasKey(outfile):
-    hArgs = fileHeaderArgs[outfile]
-    # If :tangle is not specified on a begin_src block, inherit that
-    # value if possible.
-    if onBeginSrc and hArgs.tangle.isNone():
-      if headerArgsDefaults.hasKey((orgLevel, lang)):
-        hArgs.tangle = headerArgsDefaults[(orgLevel, lang)].tangle
-      else:
-        hArgs.tangle = headerArgsDefaults[(orgLevel, "")].tangle
-    dbg "Line {lnum} - Using fileHeaderArgs[{outfile}], now hArgs = {hArgs}"
-  elif headerArgsDefaults.hasKey((orgLevel, lang)):
+  if headerArgsDefaults.hasKey((orgLevel, lang)):
     hArgs = headerArgsDefaults[(orgLevel, lang)]
     dbg "Line {lnum} - Using Org level {orgLevel} + lang {lang} scope, now hArgs = {hArgs}"
   else:
@@ -148,16 +138,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     dbg "Line {lnum} - Using only Org level {orgLevel} scope, now hArgs = {hArgs}"
 
   # If hArgs already specifies the tangled file path, use that!
-  if hArgs.tangle.isSome() and
-     (hArgs.tangle.get() != "yes") and
-     (hArgs.tangle.get() != "no"):
-    let
-      tangledPath = hArgs.tangle.get()
-    dbg "** Line {lnum} - Old outfile={outfile}, overriding it to {tangledPath}"
-    if (not tangledPath.startsWith "/"): # if relative path
-      outfile = dir / tangledPath
+  if hArgs.tangle != "yes" and
+     hArgs.tangle != "no":
+    dbg "** Line {lnum} - Old outfile={outfile}, overriding it to {hArgs.tangle}"
+    if (not hArgs.tangle.startsWith "/"): # if relative path
+      outfile = dir / hArgs.tangle
     else:
-      outfile = tangledPath
+      outfile = hArgs.tangle
 
   for hdrArg in hdrArgs:
     let
@@ -167,7 +154,7 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     dbg "arg={arg}, argval={argval}, onBeginSrc={onBeginSrc}, outfile={outfile}"
     case arg
     of "tangle":
-      hArgs.tangle = some(argval)
+      hArgs.tangle = argval
       case argval
       of "yes":
         discard
@@ -246,33 +233,26 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
     else:                       # Ignore all other header args
       discard
 
-    # Update the default HeaderArgs for the current orgLevel+lang
-    # scope, but only using the header args set using property keyword
-    # or the drawer property.
-    if (not onBeginSrc):
-      dbg "** Line {lnum}: Updating headerArgsDefaults[({orgLevel}, {lang})] to {hArgs}"
-      headerArgsDefaults[(orgLevel, lang)] = hArgs
+  # Update the default HeaderArgs for the current orgLevel+lang
+  # scope, but only using the header args set using property keyword
+  # or the drawer property.
+  if (not onBeginSrc):
+    dbg "** Line {lnum}: Updating headerArgsDefaults[({orgLevel}, {lang})] to {hArgs}"
+    headerArgsDefaults[(orgLevel, lang)] = hArgs
 
   dbg "[after] Line {lnum} - hArgs = {hArgs}"
   if outfile != "":
     # Save the updated hArgs to the file-specific HeaderArgs global
     # value.
     outFileName = outfile
-    dbg "** Line {lnum}: Updating fileHeaderArgs[{outFileName}] to {hArgs}"
-    fileHeaderArgs[outFileName] = hArgs
 
     dbg "line={lnum}, onBeginSrc={onBeginSrc}, hArgs.tangle={hArgs.tangle} outfile={outfile} | outFileName={outFileName}"
     if onBeginSrc:
-      if hArgs.tangle.isSome() and
-         hArgs.tangle.get() != "no":
+      if hArgs.tangle != "no":
         doAssert outFileName != ""
         dbg "line {lnum}: buffering enabled for `{outFileName}'"
         bufEnabled = true
         firstLineSrcBlock = true
-
-      # Don't allow further source blocks to inherit the hArgs.tangle
-      # value set in begin_src header args.
-      hArgs.tangle = none(string)
 
     dbg "** Line {lnum}: Updating fileHeaderArgs[{outFileName}] to {hArgs}"
     fileHeaderArgs[outFileName] = hArgs
