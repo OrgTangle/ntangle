@@ -350,17 +350,13 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
   ## The ``lang`` field will be an empty string or a language string
   ## like ``"nim"``.
   let
-    spaceSepPartsRaw = line.strip.split(" ")
+    spaceSepParts = line.strip.split(" ").filterIt(it != "")
   var
-    spaceSepParts: seq[string]
     haType: HeaderArgType = haNone
     headerArgsRaw: seq[string] = @[]
     headerArgs: seq[string] = @[]
     headerArgPair: string
     lang: string
-  for p in spaceSepPartsRaw:
-    if p.strip() != "":
-      spaceSepParts.add(p)
   dbg "spaceSepParts: {spaceSepParts}", dvHigh
   if spaceSepParts.len >= 3 and
      spaceSepParts[0].toLowerAscii() == "#+property:" and
