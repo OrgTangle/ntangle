@@ -132,6 +132,13 @@ proc parseTangleHeaderProperties(hdrArgs: seq[string], lnum: int, lang: string, 
 
   if fileHeaderArgs.hasKey(outfile):
     hArgs = fileHeaderArgs[outfile]
+    # If :tangle is not specified on a begin_src block, inherit that
+    # value if possible.
+    if onBeginSrc and hArgs.tangle.isNone():
+      if headerArgsDefaults.hasKey((orgLevel, lang)):
+        hArgs.tangle = headerArgsDefaults[(orgLevel, lang)].tangle
+      else:
+        hArgs.tangle = headerArgsDefaults[(orgLevel, "")].tangle
     dbg "Line {lnum} - Using fileHeaderArgs[{outfile}], now hArgs = {hArgs}"
   elif headerArgsDefaults.hasKey((orgLevel, lang)):
     hArgs = headerArgsDefaults[(orgLevel, lang)]
