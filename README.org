@@ -33,17 +33,26 @@ provide /almost/ the same tangling functionality at a much higher
 speed.
 
 You do *not* need Emacs or Org mode installed to use ~ntangle~.
+* Download binary (64-bit GNU/Linux)
+If you are using a 64-bit GNU/Linux type OS, head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]]
+section of this repo to download the release archive
+~ntangle-VERSION.Linux_64bit_musl.tar.xz~. Then simply extract it to
+get the statically linked binary ~ntangle~ and run it.
+
+If you are using any other type of OS, see [[#installation][Installation]].
 * Installation
-** Download binary
-- 64-bit GNU/Linux type OS :: Head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]] section of this
-     repo to download the release archive
-     ~ntangle-VERSION.Linux_64bit_musl.tar.xz~. Then simply extract it
-     to get the statically linked binary ~ntangle~ and run it.
-- Other OSes :: The statically linked binary is available only for
-                64-bit GNU/Linux type OS. Follow the [[#development][Development]]
-                section below to build the binary locally for your OS.
-** Build locally
-See [[#development][Development]].
+
+[[https://github.com/nim-lang/nimble][~nimble~]] can be used to install ~ntangle~. This utility ships with Nim
+installations. Think of it as the equivalent of the Python ~pip~.
+
+/See [[https://github.com/dom96/choosenim#installation][*choosenim* installation]] to install *nim* and *nimble*./
+
+To install ~ntangle~:
+#+begin_example
+nimble install ntangle
+#+end_example
+
+Above installs the binary in the *~/.nimble/bin/* directory.
 * Features
 ** Tangling /minus Noweb/ [7/8]
 - [X] Understands global tangle header-args in ~#+property~ keywords
@@ -117,33 +126,60 @@ file.
 * Org mode file samples for tangling
 You can find samples of the supported Org mode tangling in the [[https://github.com/OrgTangle/ntangle/tree/master/tests][*test*
 directory]] of this project.
-* Development
-** Building
-[[https://github.com/nim-lang/nimble][~nimble~]] is used to build this project. This utility ships with Nim
-installation. Think of it as the equivalent of ~pip~ in Python.
+* Org Tangle Syntax
+~ntangle~ expects the Org files to use the ~header-args~ property
+syntax used in Org mode 9.0 and newer. There was a minor syntax change
+with *header-args* property in Org 9.0 ([[https://code.orgmode.org/bzg/org-mode/src/a85ba9fb9bc7518bc0b654c79812f5606be84c58/etc/ORG-NEWS#L1042][see ORG-NEWS]]).
 
-With Nim and ~nimble~ installed, do:
+So if you used the below in Org 8.x and older:
+#+begin_src org
+# Deprecated syntax
+,#+property: tangle yes
+#+end_src
+
+Refactor that to:
+#+begin_src org
+# Org 9.0 syntax
+,#+property: header-args :tangle yes
+#+end_src
+
+Similarly, refactor a property drawer from:
+#+begin_src org
+# Deprecated syntax
+,* Some heading
+:PROPERTIES:
+:tangle: yes
+:END:
+#+end_src
+
+To:
+#+begin_src org
+# Org 9.0 syntax
+,* Some heading
+:PROPERTIES:
+:header-args: :tangle yes
+:END:
+#+end_src
+* Development
+Below assumes that you have ~nim~ and ~nimble~ installed.
+** Building
 #+begin_example
 git clone https://github.com/OrgTangle/ntangle
 cd ntangle
-nimble build -d:release # creates the ntangle binary in the same directory
+nimble build # creates the ntangle binary in the same directory
+# nimble build -d:release # same as above but creates an optimized binary
 #+end_example
-** Installing
-If you want to install it (i.e. build the binary and copy it to
-=~/.nimble/bin/=), do:
-#+begin_example
-# cd to the git repo dir
-nimble install
-#+end_example
-
-You need to add *~/.nimble/bin/* to your ~PATH~ environment variable.
 ** Testing
 #+begin_src shell :results output verbatim
 # cd to the git repo dir
 ./tests/test.sh
 #+end_src
 * History
-The ~ntangle.nim~ file was written as an exercise to roughly translate the
-Python script [[https://github.com/thblt/org-babel-tangle.py][~org-babel-tangle.py~]] (by @thblt) to Nim.
+I was [[https://www.reddit.com/r/emacs/comments/8m5wuf/a_python_version_of_orgbabeltangle_for_literate/dzl3ooo/][motivated]] to start this project after reading about the
+[[https://github.com/OrgTangle/org-babel-tangle.py\][~org-babel-tangle.py~]] Python project by @thblt.
+
+I wanted to just see how easy it was to translate a Python script to
+Nim (it was very easy!), and from there, this project started
+snowballing, gathering features of its own :).
 * Other Org tangling implementations
 See [[https://github.com/OrgTangle]].
