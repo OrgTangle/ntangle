@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.6.0"
+version       = "0.6.1"
 author        = "Kaushal Modi"
 description   = "Command-line utility for Tangling of Org mode documents"
 license       = "MIT"

@@ -537,7 +537,7 @@ proc ntangle(orgFilesOrDirs: seq[string]) =
 when isMainModule:
   import cligen
   dispatchGen(ntangle
-              , version = ("version", "0.6.0"))
+              , version = ("version", "0.6.1"))
   if paramCount()==0:
     quit(dispatch_ntangle(@["--help"]))
   else:
