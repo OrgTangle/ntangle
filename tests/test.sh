@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Time-stamp: <2018-10-07 23:27:20 kmodi>
+# Time-stamp: <2018-10-08 16:54:50 kmodi>
 
 set -euo pipefail # http://redsymbol.net/articles/unofficial-bash-strict-mode
 IFS=$'\n\t'
@@ -21,8 +21,11 @@ run_test () {
     "${bin}" tests/missing_arg_value/missing_arg_value.org || true
     "${bin}" tests/invalid_arg_no_colon/ || true
 
-    rm -rf ./tests/foo/bar/
-    "${bin}" tests/mkdirp_no/mkdirp_no.org || true
+    TEMP_HOME="${repo_root}/tests/mkdirp_no"
+    rm -rf "${TEMP_HOME}/foo/"
+    HOME="${TEMP_HOME}" "${bin}" tests/mkdirp_no/mkdirp_no.org || true
+
+    rm -rf "${repo_root}/tests/mkdirp_yes/foo/"
     "${bin}" tests/mkdirp_yes/mkdirp_yes.org
 
     # Test tangling an Org file in the same dir.

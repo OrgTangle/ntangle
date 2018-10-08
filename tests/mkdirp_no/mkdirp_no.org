@@ -1,3 +1,3 @@
-#+begin_src shell :tangle "./foo/bar/mkdirp_test.sh"
+#+begin_src shell :tangle "~/foo/bar/mkdirp_test.sh"
 echo "Hello"
 #+end_src

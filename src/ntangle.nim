@@ -157,7 +157,7 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
       of "no":
         bufEnabled = false
       else:               #filename
-        outfile = argval
+        outfile = argval.expandTilde
         if (not outfile.startsWith "/"): # if relative path
           outfile = dir / outfile
     of "padline":
@@ -474,11 +474,12 @@ proc writeFiles() =
       dataUpdated = data
     dbg "  outDir: `{outDir}'"
     if outDir != "":
-      if (not dirExists(outDir)) and fileHeaderArgs[file].mkdirp:
-        echo fmt"  Creating {outDir}/ .."
-        createDir(outDir)
       if (not dirExists(outDir)):
-        raise newException(IOError, fmt"Unable to write to `{file}'. `{outDir}/' directory does not exist.")
+        if fileHeaderArgs[file].mkdirp:
+          echo fmt"  Creating {outDir}/ .."
+          createDir(outDir)
+        else:
+          raise newException(UserError, fmt"Unable to write to `{file}' as `{outDir}/' directory does not exist. Set ':mkdirp yes' header arg to auto-create it.")
 
     if fileHeaderArgs[file].shebang != "":
       dataUpdated = fileHeaderArgs[file].shebang & "\n" & data
