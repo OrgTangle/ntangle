@@ -63,8 +63,8 @@ script:
   # --accept to say Yes to prompts like "Prompt: No local packages.json found, download it from internet? [y/N]"
   - nimble install --depsOnly --accept
   - nim musl "${NIMFILE}"
-  # See that the binary is not dynamic.
-  - ldd "${BINFILE}" || true
+  # Verify the built binary version.
+  - eval "${BINFILE} --version"
 
 before_deploy:
   - cd "${TRAVIS_BUILD_DIR}"
