@@ -1,0 +1,9 @@
+#+property: header-args :tangle yes
+
+#+begin_src emacs-lisp -n
+(message "this will be tangled")
+#+end_src
+
+#+begin_src emacs-lisp -n :tangle no
+(message "this will not be tangled")
+#+end_src
