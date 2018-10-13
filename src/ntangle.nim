@@ -389,11 +389,16 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
       haType = haPropertyDrawer
   elif spaceSepParts.len >= 2 and
        spaceSepParts[0].toLowerAscii() == "#+begin_src":
-    if spaceSepParts.len >= 3:
-      doAssert spaceSepParts[2][0] == ':'
-      headerArgsRaw = spaceSepParts[2 .. spaceSepParts.high]
     lang = spaceSepParts[1].strip()
     haType = haBeginSrc
+    var
+      startHeaderArgs = 0
+    for i in 2 .. spaceSepParts.high:
+      if spaceSepParts[i][0] == ':':
+        startHeaderArgs = i
+        break
+    if startHeaderArgs >= 2:
+      headerArgsRaw = spaceSepParts[startHeaderArgs .. spaceSepParts.high]
   if haType != haNone:
     #echo headerArgsRaw
     for i, h in headerArgsRaw:
