@@ -62,6 +62,7 @@ script:
   # Compile the static binary using musl.
   # --accept to say Yes to prompts like "Prompt: No local packages.json found, download it from internet? [y/N]"
   - nimble install --depsOnly --accept
+  - git clone https://github.com/kaushalmodi/nim_config && cp nim_config/config.nims . # Get my global config.nims
   - nim musl "${NIMFILE}"
   # Verify the built binary version.
   - eval "${BINFILE} --version"
