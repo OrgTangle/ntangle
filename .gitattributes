@@ -1,2 +1,8 @@
+# -*- conf -*-
+# https://github.com/github/linguist#using-gitattributes
+# Syntax highlight the .nims files using Nim syntax highlighter.
+*.nims linguist-language=Nim
 # https://github.com/github/linguist#vendored-code
+# Do not count the "vendored" files in the repo's language statistics.
+.dir-locals.el linguist-vendored
 tests/* linguist-vendored
