@@ -9,4 +9,4 @@ bin           = @["ntangle"]
 
 # Dependencies
 
-requires "nim >= 0.19.0", "cligen >= 0.9.16"
+requires "nim >= 0.19.0", "cligen#head"

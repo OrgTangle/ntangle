@@ -553,14 +553,17 @@ when isMainModule:
   import cligen
   const
     url = "https://github.com/OrgTangle/ntangle"
-  dispatchGen(ntangle
-              , usage = "\nNAME\n  ntangle - $doc\n" &
-                "USAGE\n  $command $args\n\n" &
-                "OPTIONS\n$options\n" &
-                "URL\n  " & url & "\n"
-              , help = { "version": "write the version to stdout" }
+
+  # https://github.com/c-blake/cligen/issues/83#issuecomment-444951772
+  proc mergeParams(cmdNames: seq[string], cmdLine=commandLineParams()): seq[string] =
+    result = cmdLine
+    if cmdLine.len == 0:
+      result = @["--help"]
+
+  dispatch(ntangle
+           , usage = "\nNAME\n  ntangle - $doc\n" &
+             "USAGE\n  $command $args\n\n" &
+             "OPTIONS\n$options\n" &
+             "URL\n  " & url & "\n"
+           , help = { "version": "write the version to stdout" }
   )
-  if paramCount()==0:
-    quit(dispatch_ntangle(@["--help"]))
-  else:
-    quit(dispatch_ntangle(commandLineParams()))
