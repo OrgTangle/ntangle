@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.6.3"
+version       = "0.6.4"
 author        = "Kaushal Modi"
 description   = "Command-line utility for Tangling of Org mode documents"
 license       = "MIT"
@@ -9,4 +9,4 @@ bin           = @["ntangle"]
 
 # Dependencies
 
-requires "nim >= 0.19.0", "cligen#head"
+requires "nim >= 0.19.0", "cligen >= 0.9.18"
