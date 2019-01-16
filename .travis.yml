@@ -70,7 +70,7 @@ script:
   - nimble install --depsOnly --accept
   # Test installing ntangle using nimble.
   # --reject denies the offer to install from ntangle@#head if "nimble install ntangle" fails.
-  - nimble install --reject ntangle
+  - nimble install --reject "${PROGNAME}"
   # Now build using musl.
   - git clone https://github.com/kaushalmodi/nim_config && cp nim_config/config.nims . # Get my global config.nims
   - nim musl "${NIMFILE}"
