@@ -516,18 +516,8 @@ proc doOrgTangle(file: string) =
     writeFiles()
     echo ""
 
-proc echoVersion() =
-  ## Echo the version string.
-  const
-    versionString = staticExec("git describe --tags HEAD")
-  echo fmt"ntangle {version_string}"
-
-proc ntangle(orgFilesOrDirs: seq[string], version = false) =
+proc ntangle(orgFilesOrDirs: seq[string]) =
   ## Command-line utility for Tangling of Org mode documents
-  if version:
-    echoVersion()
-    quit QuitSuccess
-
   startTime = cpuTime()
   try:
     for f1 in orgFilesOrDirs:
@@ -560,10 +550,13 @@ when isMainModule:
     if cmdLine.len == 0:
       result = @["--help"]
 
-  dispatch(ntangle
-           , usage = "\nNAME\n  ntangle - $doc\n" &
+  const
+    versionString = staticExec("git describe --tags HEAD")
+  # https://github.com/c-blake/cligen/blob/master/RELEASE-NOTES.md#version-0928
+  clCfg.version = versionString
+
+  dispatch(ntangle,
+           usage = "\nNAME\n  ntangle - $doc\n" &
              "USAGE\n  $command $args\n\n" &
              "OPTIONS\n$options\n" &
-             "URL\n  " & url & "\n"
-           , help = { "version": "write the version to stdout" }
-  )
+             "URL\n  " & url & "\n")
