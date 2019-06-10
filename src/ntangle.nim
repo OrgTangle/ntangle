@@ -551,12 +551,17 @@ when isMainModule:
       result = @["--help"]
 
   const
-    versionString = staticExec("git describe --tags HEAD")
-  # https://github.com/c-blake/cligen/blob/master/RELEASE-NOTES.md#version-0928
-  clCfg.version = versionString
+    version = staticExec("git describe --tags HEAD")
+    nimbleData = staticRead("../ntangle.nimble")
+    uri = "https://github.com/OrgTangle/ntangle"
+    myUsage = "\nNAME\n  ntangle - ${doc}" &
+      "\nUSAGE\n  ${command} ${args}" &
+      "\n\nOPTIONS\n$options" &
+      "\nURI\n  " & uri &
+      "\n\nAUTHOR\n  " & nimbleData.fromNimble("author") &
+      "\n\nVERSION\n  " & version
 
-  dispatch(ntangle,
-           usage = "\nNAME\n  ntangle - $doc\n" &
-             "USAGE\n  $command $args\n\n" &
-             "OPTIONS\n$options\n" &
-             "URL\n  " & url & "\n")
+  # https://github.com/c-blake/cligen/blob/master/RELEASE-NOTES.md#version-0928
+  clCfg.version = version
+
+  dispatch(ntangle, usage=myUsage)
