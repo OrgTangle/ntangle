@@ -1,0 +1,5 @@
+#+property: header-args :tangle yes
+
+#+begin_src emacs-lisp -n
+(message "3")
+#+end_src

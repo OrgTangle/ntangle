@@ -1,0 +1,8 @@
+#+property: header-args :tangle yes
+
+#+begin_src emacs-lisp -n
+(message "1")
+#+end_src
+
+#+include: "./file2.org"
+#+include: "file3.org"
