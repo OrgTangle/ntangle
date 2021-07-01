@@ -1,0 +1,34 @@
+name: RunTests
+
+on:
+  pull_request:
+    types:
+      - '*'
+  push:
+  schedule:
+    # Every week: https://crontab.guru/#0_0_*_*_0
+    - cron: '0 0 * * 0'
+
+jobs:
+  run_tests:
+    # runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        nim: ['devel', 'version-1-4']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: alaviss/setup-nim@0.1.1
+        with:
+          path: 'nim'
+          version: ${{ matrix.nim }}
+      - name: Pull kaushalmodi's global config.nims
+        run: nim pullConfig
+      - name: Run tests
+        run: |
+          # --accept to say Yes to prompts like "Prompt: No local packages.json found, download it from internet? [y/N]"
+          nimble install --depsOnly --accept
+          # Test installing PROGNAME using nimble.
+          # --reject denies the offer to install from PROGNAME@#head if "nimble install PROGNAME" fails.
+          nimble install --reject ntangle

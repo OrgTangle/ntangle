@@ -3,6 +3,8 @@
 /Command-line utility for Tangling of Org documents — programmed in
 Nim./
 
+[[https://github.com/OrgTangle/ntangle/actions/workflows/test.yml][https://github.com/OrgTangle/ntangle/actions/workflows/test.yml/badge.svg]]
+
 * What is Tangling
 From [[https://orgmode.org/manual/Extracting-source-code.html][Org Manual -- Extracting source code]]:
 
@@ -33,13 +35,6 @@ provide /almost/ the same tangling functionality at a much higher
 speed.
 
 You do *not* need Emacs or Org mode installed to use ~ntangle~.
-* Download binary (64-bit GNU/Linux)
-If you are using a 64-bit GNU/Linux type OS, head over to the [[https://github.com/OrgTangle/ntangle/releases][Releases]]
-section of this repo to download the release archive
-~ntangle-VERSION.Linux_64bit_musl.tar.xz~. Then simply extract it to
-get the statically linked binary ~ntangle~ and run it.
-
-If you are using any other type of OS, see [[#installation][Installation]].
 * Installation
 
 [[https://github.com/nim-lang/nimble][~nimble~]] can be used to install ~ntangle~. This utility ships with Nim
@@ -176,7 +171,7 @@ nimble build # creates the ntangle binary in the same directory
 #+end_src
 * History
 I was [[https://www.reddit.com/r/emacs/comments/8m5wuf/a_python_version_of_orgbabeltangle_for_literate/dzl3ooo/][motivated]] to start this project after reading about the
-[[https://github.com/OrgTangle/org-babel-tangle.py\][~org-babel-tangle.py~]] Python project by @thblt.
+[[https://github.com/OrgTangle/org-babel-tangle.py][~org-babel-tangle.py~]] Python project by @thblt.
 
 I wanted to just see how easy it was to translate a Python script to
 Nim (it was very easy!), and from there, this project started
