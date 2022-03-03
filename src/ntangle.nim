@@ -52,7 +52,7 @@ type
   LangAndArgs = tuple
     argType: HeaderArgType
     lang: string
-    args: seq[string]
+    args: seq[tuple[key, val: string]] # args are key / value pairs.
   LevelLangIndex = tuple
     orgLevel: Natural
     lang: string
@@ -144,9 +144,7 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
 
   for hdrArg in haObj.args:
     let
-      hdrArgParts = hdrArg.strip.split(" ", maxsplit=1)
-      argkey = hdrArgParts[0]
-      argval = hdrArgParts[1]
+      (argKey, argVal) = hdrArg
     dbg "argkey={argkey}, argval={argval}, onBeginSrc={haObj.argType == haBeginSrc}, outfile={outfile}"
     case argkey
     of "tangle":
@@ -156,6 +154,8 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
         discard
       of "no":
         bufEnabled = false
+      of "": # empty `:tangle` without argument is invalid!
+        raise newException(OrgError, fmt("A `:tangle` key without yes/no/filename argument is invalid!"))
       else:               #filename
         outfile = argval.expandTilde
         if (not outfile.startsWith "/"): # if relative path
@@ -354,8 +354,8 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
     spaceSepParts = line.strip.split(" ").filterIt(it != "")
   var
     haType: HeaderArgType = haNone
-    headerArgsRaw: seq[string] = @[]
-    headerArgs: seq[string] = @[]
+    headerArgsRaw: seq[string]
+    headerArgs: seq[tuple[key, val: string]]
     headerArgPair: string
     lang: string
   dbg "spaceSepParts: {spaceSepParts}", dvHigh
@@ -400,20 +400,24 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
     if startHeaderArgs >= 2:
       headerArgsRaw = spaceSepParts[startHeaderArgs .. spaceSepParts.high]
   if haType != haNone:
-    #echo headerArgsRaw
+    var lastKey = false
+    var keyVal: tuple[key, val: string]
+    template notEmpty(kv: untyped): untyped = kv.key.len > 0 or kv.val.len > 0
     for i, h in headerArgsRaw:
-      if h.len >= 2 and h[0] == ':':
-        if i == headerArgsRaw.high:
-          raise newException(OrgError, fmt("The header args are ending with a ':key' which is not valid. Found {headerArgsRaw}"))
-        if headerArgPair != "":
-          headerArgs.add(headerArgPair)
-        headerArgPair = h[1 .. h.high]
-        #echo fmt"{i} - {headerArgPair}"
+      if h.len >= 2 and h[0] == ':': # this is a key
+        if notEmpty(keyVal): # add current `keyVal` if anything
+          headerArgs.add keyVal
+          keyVal = (key: "", val: "")
+        keyVal.key = h[1 .. h.high]
+        lastKey = true
       else:
-        headerArgPair = headerArgPair & " " & h.strip(chars = {'"'})
-        #echo fmt"{i} - {headerArgPair}"
-        if i == headerArgsRaw.high:
-          headerArgs.add(headerArgPair)
+        if not lastKey: # if the last was `not` a key, append `h` to last
+          keyVal.val &= " " & h
+        else:
+          keyVal.val = h
+        lastKey = false
+    if notEmpty(keyVal): # add current `keyVal` if anything
+      headerArgs.add keyVal
   return (haType, lang, headerArgs)
 
 proc parseLine(file: string, line: string, lnum: int) =

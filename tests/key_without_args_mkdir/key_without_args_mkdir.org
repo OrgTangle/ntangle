@@ -1,0 +1,3 @@
+#+begin_src sage :tangle do/not/exist/test.sage :session :mkdirp yes
+φ = var('φ')
+#+end_src
