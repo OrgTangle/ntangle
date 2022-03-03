@@ -154,6 +154,8 @@ proc parseTangleHeaderProperties(file: string, lnum: int, haObj: LangAndArgs) =
         discard
       of "no":
         bufEnabled = false
+      of "": # empty `:tangle` without argument is invalid!
+        raise newException(OrgError, fmt("A `:tangle` key without yes/no/filename argument is invalid!"))
       else:               #filename
         outfile = argval.expandTilde
         if (not outfile.startsWith "/"): # if relative path
