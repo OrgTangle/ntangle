@@ -1,0 +1,19 @@
+The first one won't be tangled.
+#+begin_src sage :session
+x = var('x')
+#+end_src
+This one will be tangled.
+#+begin_src sage :session :tangle yes
+φ = var('φ')
+#+end_src
+This one will also be tangled.
+#+begin_src sage :tangle yes :session
+f(φ) = cos(φ)
+#+end_src
+And this again will be tangled. The =mkdirp= is a no-op here, as we
+do not give a directory. There is a separate test, which checks that
+the option works correctly.
+#+begin_src sage :tangle yes :session :mkdirp yes
+f(123)
+#+end_src
+

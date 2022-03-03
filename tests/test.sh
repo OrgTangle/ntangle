@@ -18,6 +18,8 @@ run_test () {
     "${bin}" tests/property_drawer/
     "${bin}" tests/dmacs/
     "${bin}" tests/begin_src/
+    "${bin}" tests/key_without_args/
+    "${bin}" tests/key_without_args_mkdir/
 
     "${bin}" tests/missing_arg_value/missing_arg_value.org || true
     "${bin}" tests/invalid_arg_no_colon/ || true
