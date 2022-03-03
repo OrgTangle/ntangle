@@ -411,10 +411,13 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
         keyVal.key = h[1 .. h.high]
         lastKey = true
       else:
+        let
+          # If value of h is "\"some file.txt\"", change it to "some file.txt"
+          valWithoutLiteralQuotes = h.strip(chars = {'"'})
         if not lastKey: # if the last was `not` a key, append `h` to last
-          keyVal.val &= " " & h
+          keyVal.val &= " " & valWithoutLiteralQuotes
         else:
-          keyVal.val = h
+          keyVal.val = valWithoutLiteralQuotes
         lastKey = false
     if notEmpty(keyVal): # add current `keyVal` if anything
       headerArgs.add keyVal
