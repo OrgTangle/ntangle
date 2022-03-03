@@ -400,19 +400,21 @@ proc getHeaderArgs(file: string, line: string, lnum: int): LangAndArgs =
   if haType != haNone:
     var lastKey = false
     var keyVal: tuple[key, val: string]
+    template notEmpty(kv: untyped): untyped = kv.key.len > 0 or kv.val.len > 0
     for i, h in headerArgsRaw:
       if h.len >= 2 and h[0] == ':': # this is a key
-        if lastKey: # if last was already a key, add `keyVal` to res
+        if notEmpty(keyVal): # add current `keyVal` if anything
           headerArgs.add keyVal
           keyVal = (key: "", val: "")
         keyVal.key = h[1 .. h.high]
         lastKey = true
       else:
-        keyVal.val = h
-        headerArgs.add keyVal
-        keyVal = (key: "", val: "")
+        if not lastKey: # if the last was `not` a key, append `h` to last
+          keyVal.val &= " " & h
+        else:
+          keyVal.val = h
         lastKey = false
-    if keyVal.key.len > 0 or keyVal.val.len > 0: # add current `keyVal` if anything
+    if notEmpty(keyVal): # add current `keyVal` if anything
       headerArgs.add keyVal
   return (haType, lang, headerArgs)
 
